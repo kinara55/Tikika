@@ -1,0 +1,12 @@
+body {
+    background-color: #3723bb;
+    padding: 20px;
+}
+.form-header {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+
+}
