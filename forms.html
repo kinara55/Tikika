@@ -5,9 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forms Example</title>
     <link rel="stylesheet" href="css/style.css">
+    <script>
+        function showForm(formId) {
+            document.getElementById('signup-form').style.display = formId === 'signup' ? 'block' : 'none';
+            document.getElementById('login-form').style.display = formId === 'login' ? 'block' : 'none';
+        }
+        window.onload = function() {
+            showForm('signup'); // Show signup form by default
+        };
+</script>
 </head>
 <body>
-<section class="form container" >
+<section class="form-container" >
     <div class="form-header">
         <h1>Sign up form</h1>
          <!-- Sign up Form -->     
@@ -21,24 +30,25 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br><br>
 
-            <input type="submit" value="Sign Up">
+            <button type="submit">Sign Up</button>
         </form>
         <div>
-            <p>Already have an account? <a href="/login">Login here</a></p> 
+            <p>Already have an account? <button type="button" onclick="showForm('login')">Login here</button></p>
         </div>
         <!-- Sign in Form -->
     </div>
-    <hr>    
-    <div class="form-header">    
+
+    <div id="login-form" style="display:none;">
         <h1>Login form</h1>
-        <form class="login-form" action="/login" method="post">
+        <form action="/login" method="post" aria-label="Login Form">
             <label for="login-username">Username:</label>
             <input type="text" id="login-username" name="username" required><br><br>
 
             <label for="login-password">Password:</label>
             <input type="password" id="login-password" name="password" required><br><br>
 
-            <input type="submit" value="Login">
+            <button type="submit">Login</button>
+            <p>Don't have an account? <button type="button" onclick="showForm('signup')">Sign up here</button></p>
         </form>
     </div>
 </section>
