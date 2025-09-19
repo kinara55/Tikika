@@ -15,14 +15,20 @@ $password = $_POST['password'] ?? '';
 
 $errors = [];
 
-// Username required
+// Username validation
 if ($username === '') {
     $errors[] = 'Username is required';
+} elseif (!preg_match('/^[A-Za-z0-9_]{3,30}$/', $username)) {
+    $errors[] = 'Username must be 3-30 characters (letters, numbers, underscore only)';
 }
 
-// Password required
+// Password validation
 if ($password === '') {
     $errors[] = 'Password is required';
+} elseif (strlen($password) < 8) {
+    $errors[] = 'Password must be at least 8 characters long';
+} elseif (!preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+    $errors[] = 'Password must contain at least one letter and one number';
 }
 
 ?>
