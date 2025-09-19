@@ -42,7 +42,7 @@ $conf['DB_NAME'] = 'tikika_db';
 $conf['mail_type'] = 'smtp'; // mail or smtp
 $conf['smtp_host'] = 'smtp.gmail.com'; // SMTP Host Address
 $conf['smtp_user'] = 'bridgetwanyama0@gmail.com'; // SMTP Username
-$conf['smtp_pass'] = 'vzio kyjs xvcp jjzh'; // SMTP Password
+$conf['smtp_pass'] = ''; // SMTP Password
 $conf['smtp_port'] = 587; // SMTP Port - 587 for tls, 465 for ssl
 $conf['smtp_secure'] = 'tls'; // Encryption - ssl or tls
 
