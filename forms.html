@@ -11,7 +11,7 @@
             document.getElementById('login-form').style.display = formId === 'login' ? 'block' : 'none';
         }
         window.onload = function() {
-            showForm('signup'); // Show signup form by default
+            showForm('login'); // Show login form by default
         };
     </script>
 </head>
@@ -20,7 +20,7 @@
     <!-- Sign up Form -->     
     <div id="signup-form">
         <div class="form-header">
-            <h1 class="form-title">Sign up form</h1>
+            <h1>Sign up form</h1>
             <form class="signup-form" action="/submit" method="post">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required><br><br>
@@ -37,8 +37,8 @@
     </div>
 
     <!-- Sign in Form -->
-    <div class="form-header " id="login-form" style="display:none;">
-        <h1 class="form-title">Login form</h1>
+    <div class="form-header" id="login-form" style="display:none;">
+        <h1>Login form</h1>
         <form action="/login" method="post" aria-label="Login Form">
             <label for="login-username">Username:</label>
             <input type="text" id="login-username" name="username" required><br><br>
