@@ -3,7 +3,7 @@ session_start();
 require_once 'session/session_manager.php';
 require_once 'conf.php';
 
-$sessionManager = new SessionManager($conf);
+$sessionManager = new SessionManager($conf); //Object instantiation
 
 // If no user is waiting for 2FA, go back to login
 if (!isset($_SESSION['2fa_user'])) {
@@ -29,13 +29,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sessionManager->login($user['id'], $user['full_name'], $user['role_id']);
         unset($_SESSION['2fa_user']); // Clear 2FA session
 
-        $sessionManager->setMessage('msg', '<div style="color:#27ae60;">Login successful. Welcome back!</div>');
-        header('Location: index.html'); // Redirect to your homepage
+        // Redirect based on role
+    if ($user['role_id'] == 1) { // Admin
+        header('Location: admin_dashboard.php');
         exit;
     } else {
-        // Wrong code entered
-        $sessionManager->setMessage('msg', '<div style="color:#e74c3c;">Invalid code. Please try again.</div>');
+        header('Location: index.php'); // Regular user
+        exit;
     }
+} else {
+    $sessionManager->setMessage('msg', '<div style="color:#e74c3c;">Invalid code. Please try again.</div>');
+}
 }
 
 ?>
