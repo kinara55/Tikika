@@ -6,18 +6,17 @@ require 'vendor/autoload.php';
 require_once 'conf.php';
 
 /**
- * Send 2FA email
- * 
+ * Send password reset code email
+ *
  * @param string $toEmail
  * @param string $toName
  * @param string|int $code
  * @return bool
  */
-function send2FACode($toEmail, $toName, $code) {
+function sendPasswordResetCode($toEmail, $toName, $code) {
     global $conf;
 
-    $mail = new PHPMailer(true);/*Object instantiation in OOP where PHPMailer is instantiated
-    as an oject named $mail*/
+    $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();
         $mail->Host       = $conf['smtp_host'];
@@ -29,17 +28,18 @@ function send2FACode($toEmail, $toName, $code) {
             : PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $conf['smtp_port'];
 
-        $mail->setFrom($conf['smtp_user'], 'Tikika 2FA');//method setFrom defines the sender
-        $mail->addAddress($toEmail, $toName);//method addAddress define the recipient
+        $mail->setFrom($conf['smtp_user'], 'Tikika Password Reset');
+        $mail->addAddress($toEmail, $toName);
 
         $mail->isHTML(true);
-        $mail->Subject = 'Your Tikika 2FA Code';
-        $mail->Body    = "<p>Your 2FA code is: <b>{$code}</b></p><p>This code expires in 5 minutes.</p>";
+        $mail->Subject = 'Reset your Tikika password';
+        $mail->Body    = "<p>Use this code to reset your password: <b>{$code}</b></p><p>The code expires in 10 minutes. If you did not request this, you can ignore this email.</p>";
 
-        $mail->send();//method send executes the sending of the email
+        $mail->send();
         return true;
     } catch (Exception $e) {
         return false;
     }
 }
-// try and catch(Exception handling to handle errors)
+
+
