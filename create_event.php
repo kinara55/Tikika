@@ -4,7 +4,7 @@ require_once 'DB/database.php';
 require_once 'session/session_manager.php';
 
 $session = new SessionManager($conf);
-// $session->requireLogin('forms.html'); // Redirect to login if not logged in
+$session->requireLogin('forms.html'); // Redirect to login if not logged in
 $organizer_id = $session->getUserId();
 
 
@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
                 <!-- Step 1: Organizer Info -->
                 <div class="form-step" id="step-1">
                     <h2>Organizer Info</h2>
-                    <input type="hidden" name="organizer_id" value="<?php echo htmlspecialchars($user_id); ?>">
+                    <input type="hidden" name="organizer_id" value="<?php echo htmlspecialchars($organizer_id); ?>">
                     <div class="form-group">
                         <label for="organizer_name">Organizer Name</label>
                         <input type="text" id="organizer_name" name="organizer_name" value="<?php echo htmlspecialchars($user['full_name'] ?? ''); ?>" readonly>
