@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 body {
     background-color:#3723bb;
     padding: 20px;
@@ -8,8 +10,164 @@ body {
     border-radius: 5px;
     margin-bottom: 20px;
     text-align: center;
+>>>>>>> cf59e544ab2c8b745500d0524086c11980c5bd7e
 
+/* ========== Base Styles ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+<<<<<<< HEAD
+
+body {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+/* ========== General Form Styles ========== */
+.form-title {
+    color: #222;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-container {
+    background: #fff;
+    border-radius: 15px;
+    padding: 30px 40px;
+    max-width: 400px;
+    text-align: center;
+    margin: 40px auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+form {
+    text-align: left;
+}
+
+.signup-btn, .login-btn {
+    background: #3723bb;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* ========== Event Form Styles ========== */
+.event-body {
+    background: #f5f7fa;
+    min-height: 100vh;
+    padding: 40px 0;
+}
+
+.event-container {
+    background-color: bisque;
+    max-width: 500px;
+    margin: 40px auto;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    padding: 32px 24px;
+}
+
+.eventform-header {
+    color: #222;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.eventform-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    text-align: left;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.form-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1 1 220px;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: block;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 4px;
+    font-size: 1rem;
+}
+
+button.btn-primary {
+    background: #3723bb;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 16px;
+}
+
+.success-message, .error-message {
+    display: none;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.success-message {
+    background: #e6ffed;
+    color: #0a7f2e;
+    border: 1px solid #b7e4c7;
+}
+
+.error-message {
+    background: #ffe6e6;
+    color: #b00020;
+    border: 1px solid #f5c2c7;
+}
+
+/* ========== Responsive Styles ========== */
+@media (max-width: 600px) {
+    .event-container, .eventform-container {
+        max-width: 100%;
+        padding: 12px;
+        box-shadow: none;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    button.btn-primary {
+        width: 100%;
+    }
+    input, select, textarea {
+        font-size: 0.95rem;
+        padding: 7px 8px;
+    }
+    .eventform-header {
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+    }
+=======
 body {
   font-family: Arial, sans-serif;
 }
@@ -17,4 +175,5 @@ body {
 .card img {
   height: 200px;
   object-fit: cover;
+>>>>>>> cf59e544ab2c8b745500d0524086c11980c5bd7e
 }
