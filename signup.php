@@ -1,4 +1,7 @@
 <?php
+require_once 'conf.php';
+require_once 'DB/database.php';
+$db=new Database($conf);
 // Basic server-side validation for signup form
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -10,9 +13,11 @@ function sanitize_input(string $value): string {
     return trim($value);
 }
 
-$username = sanitize_input($_POST['username'] ?? '');
+$full_name = sanitize_input($_POST['full_name'] ?? '');
 $email = sanitize_input($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
+$phone=
+
 
 $errors = [];
 
@@ -48,6 +53,16 @@ if (empty($errors)) {
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 }
 
+
+if (empty($errors)) {
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    $sql = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
+    try {
+        $db->query($sql, [$username, $email, $passwordHash]);
+    } catch (Exception $e) {
+        $errors[] = "Database error: " . $e->getMessage();
+    }
+}
 // Output minimal HTML response with results
 ?>
 <!DOCTYPE html>
