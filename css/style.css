@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-=======
-body {
-    background-color:#3723bb;
-    padding: 20px;
-}
-.form-header {
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    text-align: center;
->>>>>>> cf59e544ab2c8b745500d0524086c11980c5bd7e
 
 /* ========== Base Styles ========== */
 * {
@@ -18,7 +5,6 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
-<<<<<<< HEAD
 
 body {
     background-color: #f5f7fa;
@@ -167,13 +153,4 @@ button.btn-primary {
         font-size: 1.2rem;
         margin-bottom: 16px;
     }
-=======
-body {
-  font-family: Arial, sans-serif;
-}
-
-.card img {
-  height: 200px;
-  object-fit: cover;
->>>>>>> cf59e544ab2c8b745500d0524086c11980c5bd7e
 }
