@@ -1,4 +1,14 @@
 <?php
+// Start session and check login status
+require_once 'conf.php';
+require_once 'session/session_manager.php';
+
+$sessionManager = new SessionManager($conf);
+$isLoggedIn = $sessionManager->isLoggedIn();
+$userName = $isLoggedIn ? $sessionManager->getUsername() : '';
+$userRole = $isLoggedIn ? $sessionManager->getRoleId() : 0;
+$currentPage = 'home'; // Set current page for active nav highlighting
+
 // Define events (replace later with DB fetch)
 $events = [
     1 => ["title" => "AfroBeats Night", "date" => "Oct 15, 2025", "price" => "Ksh 1500", "image" => "images/image1.jpg"],
@@ -13,6 +23,7 @@ $events = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tikika - Home</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
   <style>
    
@@ -54,31 +65,14 @@ $events = [
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.php">Tikika</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="forms.html">Log in</a></li>
-          <li class="nav-item"><a class="nav-link" href="events.html">Events</a></li>
-          <li class="nav-item"><a class="nav-link" href="create_event.php">Create Event</a></li>
-          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <?php include 'components/navbar.php'; ?>
 
   <!-- Hero Section -->
   <section class="hero-section d-flex flex-column align-items-center justify-content-center text-center">
     <div>
       <h1 class="fw-bold">Welcome to Tikika</h1>
       <p class="lead">Discover and book tickets for the hottest concerts & events!</p>
-      <a href="events.html" class="btn btn-lg mt-3">🎟️ Browse Events</a>
+      <a href="events.php" class="btn btn-lg mt-3">🎟️ Browse Events</a>
     </div>
   </section>
 
@@ -107,8 +101,8 @@ $events = [
   <footer class="text-center py-4">
     <p>&copy; 2025 Tikika. All Rights Reserved.</p>
     <p>
-      <a href="about.html" class="me-3">About</a>
-      <a href="contact.html">Contact</a>
+      <a href="about.php" class="me-3">About</a>
+      <a href="contact.php">Contact</a>
     </p>
     <div class="social-links mt-3">
       <a href="https://www.instagram.com/tikika_events" target="_blank" class="me-3">

@@ -1,4 +1,14 @@
 <?php
+// Start session and check login status
+require_once 'conf.php';
+require_once 'session/session_manager.php';
+
+$sessionManager = new SessionManager($conf);
+$isLoggedIn = $sessionManager->isLoggedIn();
+$userName = $isLoggedIn ? $sessionManager->getUsername() : '';
+$userRole = $isLoggedIn ? $sessionManager->getRoleId() : 0;
+$currentPage = 'events'; // Set current page for active nav highlighting
+
 // event_details.php
 
 // Fake events data (later you can fetch this from database)
@@ -6,7 +16,7 @@ $events = [
   1 => [
     "title" => "AfroBeats Night",
     "date" => "October 15, 2025",
-    "location" => "Nairobi Arena",
+    "location" => "Nairobi Concert Hall",
     "price" => "Ksh 1500",
     "image" => "images/image1.jpg",
     "description" => "Get ready for a night of amazing AfroBeats music with top artists from across Africa. Dance, connect, and create memories that last forever!"
@@ -40,8 +50,27 @@ $event = $events[$id];
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo $event['title']; ?> - Tikika</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
+    /* Navbar Gradient */
+    .navbar {
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    }
+
+    .navbar-brand, .nav-link {
+      color: #fff !important;
+      font-weight: 500;
+    }
+
+    .nav-link.active {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .nav-link:hover {
+      color: #ffd6d6 !important;
+    }
+
     body {
       background-color: #fff7f9; /* soft pink background */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -67,8 +96,19 @@ $event = $events[$id];
     }
 
     .event-image {
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      width: 100%;              /* Fill card width */
+      height: 350px;            /* Fixed height for consistency */
+      object-fit: cover;        /* Crop nicely instead of stretching */
+      border-radius: 12px;      /* Smooth corners */
+      border: 3px solid #ff0066; /* Pink border */
+      box-shadow: 0 6px 15px rgba(255, 102, 0, 0.4); /* Orange glow */
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .event-image:hover {
+      transform: scale(1.05); /* Zoom on hover */
+      box-shadow: 0 10px 25px rgba(255, 0, 102, 0.6);
+      border-color: #ff6600; /* Change to orange on hover */
     }
 
     .btn-buy {
@@ -93,48 +133,17 @@ $event = $events[$id];
       background-color: #ff6b81;
       color: #fff;
     }
-     
 
+    /* Footer Gradient */
     footer {
-      margin-top: 60px;
-      background: linear-gradient(45deg, #ff4b2b, #ff914d);
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
+      color: #fff;
     }
-
-    .event-image {
-  width: 100%;              /* Fill card width */
-  height: 350px;            /* Fixed height for consistency */
-  object-fit: cover;        /* Crop nicely instead of stretching */
-  border-radius: 12px;      /* Smooth corners */
-  border: 3px solid #ff0066; /* Pink border */
-  box-shadow: 0 6px 15px rgba(255, 102, 0, 0.4); /* Orange glow */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.event-image:hover {
-  transform: scale(1.05); /* Zoom on hover */
-  box-shadow: 0 10px 25px rgba(255, 0, 102, 0.6);
-  border-color: #ff6600; /* Change to orange on hover */
-}
   </style>
 </head>
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(45deg, #ff4b2b, #ff914d);">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">Tikika</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="events.html">Events</a></li>
-          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <?php include 'components/navbar.php'; ?>
 
   <!-- Event Details Section -->
   <section class="container my-5">
@@ -150,21 +159,17 @@ $event = $events[$id];
         <p><?php echo $event['description']; ?></p>
         <div class="d-flex gap-3 mt-3">
           <a href="buy_ticket.php?id=<?php echo $id; ?>" class="btn btn-buy btn-lg shadow">Buy Ticket</a>
-          <a href="events.html" class="btn btn-back btn-lg">Back to Events</a>
+          <a href="events.php" class="btn btn-back btn-lg">Back to Events</a>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="text-white text-center py-3">
+  <footer class="text-center py-3">
     <p>&copy; 2025 Tikika. All Rights Reserved.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-
-

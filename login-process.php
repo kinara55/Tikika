@@ -2,11 +2,13 @@
 
 require_once 'conf.php';
 require_once 'session/session_manager.php';
-require_once 'DB/database.php';
-require_once 'sendmail.php'; 
+require_once 'DB/database.php'; 
 
 $sessionManager = new SessionManager($conf);
 $db = new Database($conf);
+
+// Clear any old error messages
+$sessionManager->clearErrors();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: forms.html');
@@ -23,16 +25,9 @@ $password = $_POST['password'] ?? '';
 
 $errors = [];
 
-// Username validation
-if ($username === '') $errors[] = 'Username is required';
-elseif (strlen($username) < 3 || strlen($username) > 30) $errors[] = 'Username must be 3-30 chars';
-elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) $errors[] = 'Username can only contain letters, numbers, and underscores';
-
-// Password validation
+// Basic validation
+if ($username === '') $errors[] = 'Email or Full Name is required';
 if ($password === '') $errors[] = 'Password is required';
-elseif (strlen($password) < 8) $errors[] = 'Password must be at least 8 chars';
-elseif (!preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password))
-    $errors[] = 'Password must contain at least one letter and one number';
 
 if (!empty($errors)) {
     $sessionManager->setErrors($errors);
@@ -50,48 +45,49 @@ if ($sessionManager->isAccountLocked()) {
 
 try {
     $user = $db->fetchOne(
-        "SELECT id, full_name, email, password_hash, role_id, is_active 
+        "SELECT id, full_name, email, password_hash, role_id, is_verified
          FROM users 
          WHERE email = ? OR full_name = ?",
         [$username, $username]
     );
 
-    if (!$user || !password_verify($password, $user['password_hash'])) {
+    if (!$user) {
         $sessionManager->incrementLoginAttempts();
-        $sessionManager->setMessage('msg', 'Invalid username or password.');
+        $sessionManager->setMessage('msg', 'No account found with that email or name.');
         $sessionManager->setFormData(['username' => $username]);
         header('Location: forms.html');
         exit;
     }
 
-    if (!$user['is_active']) {
-        $sessionManager->setMessage('msg', 'Account deactivated. Contact support.');
+    if (!password_verify($password, $user['password_hash'])) {
+        $sessionManager->incrementLoginAttempts();
+        $sessionManager->setMessage('msg', 'Invalid password.');
+        $sessionManager->setFormData(['username' => $username]);
+        header('Location: forms.html');
+        exit;
+    }
+
+    // Check if email is verified
+    if (!$user['is_verified']) {
+        $sessionManager->setMessage('msg', 'Please verify your email address before logging in. Check your email for the verification code.');
+        $sessionManager->setFormData(['username' => $username]);
         header('Location: forms.html');
         exit;
     }
 
     $sessionManager->resetLoginAttempts();
 
-    // ------------------ 2FA ------------------
-    $code = random_int(100000, 999999);
-    $_SESSION['2fa_user'] = [
-        'id' => $user['id'],
-        'full_name' => $user['full_name'],
-        'role_id' => $user['role_id'],
-        'email' => $user['email'],
-        'code' => $code,
-        'expires_at' => time() + 300
-    ];
+    // ------------------ LOGIN SUCCESS ------------------
+    $sessionManager->login($user['id'], $user['full_name'], $user['role_id']);
 
-    // Send 2FA email
-    if (!send2FACode($user['email'], $user['full_name'], $code)) {
-        $sessionManager->setMessage('msg', 'Could not send 2FA email. Try again later.');
-        header('Location: forms.html');
+    // Redirect based on role
+    if ($user['role_id'] == 1) { // Admin
+        header('Location: admin_dashboard.php');
+        exit;
+    } else {
+        header('Location: index.php'); // Regular user
         exit;
     }
-
-    header('Location: verify_2FA.php');
-    exit;
 
 } catch (Exception $e) {
     $sessionManager->setMessage('msg', 'Login failed. Please try again.');

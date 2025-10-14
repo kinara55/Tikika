@@ -1,13 +1,22 @@
 <?php
 require_once 'conf.php';
 require_once 'DB/database.php';
-require_once 'sendmail_reset.php';
+require_once 'mail/sendmail_reset.php';
 require_once 'session/session_manager.php';
 
 $db = new Database($conf);
 $sessionManager = new SessionManager($conf);
 
+// Check if this is an AJAX request
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+        exit;
+    }
     header('Location: forms.html');
     exit;
 }
@@ -22,6 +31,11 @@ if ($identifier === '') {
 }
 
 if (!empty($errors)) {
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => implode(', ', $errors)]);
+        exit;
+    }
     $sessionManager->setErrors($errors);
     header('Location: forms.html');
     exit;
@@ -62,7 +76,16 @@ if ($user) {
     ]);
 
     // Send email
-    @sendPasswordResetCode($user['email'], $user['full_name'], $code);
+    $emailSent = sendPasswordResetCode($user['email'], $user['full_name'], $code);
+    if (!$emailSent) {
+        error_log("Failed to send password reset email to: " . $user['email']);
+    }
+}
+
+if ($isAjax) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true, 'message' => 'If the account exists, a reset code has been sent.']);
+    exit;
 }
 
 $sessionManager->setMessage('msg', 'If the account exists, a reset code has been sent.');
