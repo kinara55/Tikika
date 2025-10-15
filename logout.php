@@ -5,5 +5,7 @@ require_once 'session/session_manager.php';
 $sessionManager = new SessionManager($conf);
 $sessionManager->logout();
 
-header('Location: forms.html?logged_out=1');
+// Redirect to home page with logout message
+header('Location: index.php?logout=1');
 exit;
+?>

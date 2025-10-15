@@ -4,32 +4,27 @@ require_once 'conf.php';
 require_once 'session/session_manager.php';
 require_once 'DB/database.php';
 require_once 'vendor/autoload.php';
-
 $sessionManager = new SessionManager($conf);
 $db = new Database($conf);
-
 // Ensure order_id and session_id are set in the URL parameters
 if (!isset($_GET['order_id']) || !isset($_GET['session_id'])) {
     die("Order ID or session ID not specified.");
 }
-
 $orderId = $_GET['order_id'];
 $sessionId = $_GET['session_id'];
 $userId = $sessionManager->getUserId();
-
-// Set your Stripe secret key (replace with your actual key)
-$stripe_secret_key = "sk_test_YOUR_STRIPE_SECRET_KEY_HERE";
+// stripe key from configuration
+$stripe_secret_key = $conf['stripe_secret_key'];
 \Stripe\Stripe::setApiKey($stripe_secret_key);
 
 // Verify payment status with Stripe
 try {
     $stripe_session = \Stripe\Checkout\Session::retrieve($sessionId);
-    
+      // Status is an object in stripe api that has multiple statuses 
     if ($stripe_session->payment_status === 'paid') {
         // Update order status in the database
         $db->update('orders', ['status' => 'paid'], 'id = ?', [$orderId]);
-        
-        // Clear cart after successful payment
+        // Refreshing the cart after successful payment
         unset($_SESSION['cartItems']);
         
         $paymentSuccess = true;
@@ -48,8 +43,7 @@ try {
     $statusMessage = "Error verifying payment: " . $e->getMessage();
     $statusColor = "red";
 }
-
-// Retrieve the order details from the database
+// Getting your order details from the db to be used in  receipt
 $order = $db->fetchOne(
     "SELECT o.*, u.full_name, u.email FROM orders o 
      JOIN users u ON o.user_id = u.id 
@@ -58,15 +52,16 @@ $order = $db->fetchOne(
 );
 
 if (!$order) {
-    die("Order not found.");
+    $paymentSuccess = false;
+    $statusMessage = "Order not found. Please contact support if you believe this is an error.";
+    $statusColor = "red";
+    $order = null; // Set to null to prevent further errors
 }
-
 // Get order items
 $orderItems = $db->fetchAll(
-    "SELECT oi.*, e.title as event_title, e.start_datetime, e.end_datetime, v.name as venue_name
+    "SELECT oi.*, e.title as event_title, e.start_datetime, e.end_datetime, e.venue as venue_name
      FROM order_items oi 
      LEFT JOIN events e ON oi.event_id = e.id 
-     LEFT JOIN venues v ON e.venue_id = v.id 
      WHERE oi.order_id = ?",
     [$orderId]
 );
@@ -163,6 +158,7 @@ $orderItems = $db->fetchAll(
         </div>
 
         <div class="receipt-body">
+            <?php if ($order): ?>
             <div class="row">
                 <div class="col-md-6">
                     <h5><strong>Order Details</strong></h5>
@@ -177,7 +173,6 @@ $orderItems = $db->fetchAll(
                     <p><strong>Status:</strong> <span style="color: <?php echo $statusColor; ?>;"><?php echo ucfirst($order['status']); ?></span></p>
                 </div>
             </div>
-            
             <hr>  
             <h5><strong>Event Tickets</strong></h5>
             <?php foreach ($orderItems as $item): ?>
@@ -196,6 +191,18 @@ $orderItems = $db->fetchAll(
                 </div>
             </div>
             <?php endforeach; ?>
+            <?php else: ?>
+            <div class="text-center py-4">
+                <h5>Order Not Found</h5>
+                <p>The order you're looking for could not be found. This might be because:</p>
+                <ul class="text-start">
+                    <li>The order ID is incorrect</li>
+                    <li>The order belongs to a different user</li>
+                    <li>The order has been deleted</li>
+                </ul>
+                <p>Please contact support if you believe this is an error.</p>
+            </div>
+            <?php endif; ?>
             <div class="text-center mt-4">
                 <a href="index.php" class="btn btn-home me-3">
                     <i class="fas fa-home"></i> Back to Home

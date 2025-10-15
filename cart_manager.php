@@ -8,6 +8,7 @@ $db = new Database($conf);
 header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
+    // Use switch case to dynamically excecute and action based on input 
     if (isset($data['action'])) {
         switch ($data['action']) {
             case 'add':
@@ -31,10 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 function addToCart($item) {
-    if (!isset($_SESSION['cartItems'])) {
-        $_SESSION['cartItems'] = [];
+    if (!isset($_SESSION['cart'])) {
+        $_SESSION['cart'] = [];
     }
-    $cartItems = &$_SESSION['cartItems'];
+    $cartItems = &$_SESSION['cart'];
     $found = false;
 
     // Check if same event and ticket type already exists
@@ -53,18 +54,18 @@ function addToCart($item) {
 }
 // remove a siingle item basically popping it out
  function removeFromCart($index) {
-    if (isset($_SESSION['cartItems'][$index])) {
-        array_splice($_SESSION['cartItems'], $index, 1);
+    if (isset($_SESSION['cart'][$index])) {
+        array_splice($_SESSION['cart'], $index, 1);
     }
-    echo json_encode(['success' => true, 'cartItems' => $_SESSION['cartItems']]);
+    echo json_encode(['success' => true, 'cartItems' => $_SESSION['cart']]);
 }
 // Wiping the cart out
 function clearCart() {
-    $_SESSION['cartItems'] = [];
+    $_SESSION['cart'] = [];
     echo json_encode(['success' => true, 'cartItems' => []]);
 }
 // Loading the cart out 
 function loadCart() {
-    $cartItems = isset($_SESSION['cartItems']) ? $_SESSION['cartItems'] : [];
+    $cartItems = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
     echo json_encode(['success' => true, 'cartItems' => $cartItems]);
 }
