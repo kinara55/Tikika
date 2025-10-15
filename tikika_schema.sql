@@ -38,6 +38,7 @@ CREATE TABLE events (
   organizer_id INT UNSIGNED NOT NULL,
   title VARCHAR(200) NOT NULL,
   description TEXT,
+  venue VARCHAR(200) DEFAULT NULL,
   start_datetime DATETIME NOT NULL,
   end_datetime DATETIME,
   status ENUM('draft','published','cancelled') NOT NULL DEFAULT 'draft',
@@ -50,6 +51,10 @@ CREATE TABLE events (
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
+<<<<<<< HEAD
+=======
+-- Tickets (per event, multiple types possible)
+>>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea
 CREATE TABLE tickets (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   event_id INT UNSIGNED NOT NULL,
@@ -57,11 +62,11 @@ CREATE TABLE tickets (
   price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   quantity INT UNSIGNED NOT NULL DEFAULT 0,
   sold INT UNSIGNED NOT NULL DEFAULT 0,
-  available INT UNSIGNED NOT NULL DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 );
 
+<<<<<<< HEAD
 DELIMITER $$
 CREATE TRIGGER tickets_before_insert
 BEFORE INSERT ON tickets
@@ -79,6 +84,8 @@ END$$
 DELIMITER ;
 
 
+=======
+>>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea
 -- Orders
 CREATE TABLE orders (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -89,20 +96,29 @@ CREATE TABLE orders (
   provider_reference VARCHAR(255),
   status ENUM('pending','paid','cancelled','refunded') NOT NULL DEFAULT 'pending',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+<<<<<<< HEAD
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
   FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+=======
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT
+>>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea
 );
 
 -- Order items (tickets inside an order)
 CREATE TABLE order_items (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   order_id BIGINT UNSIGNED NOT NULL,
-  ticket_id INT UNSIGNED NOT NULL,
+  event_id INT UNSIGNED NOT NULL,
+  ticket_type VARCHAR(50) NOT NULL,
   quantity INT UNSIGNED NOT NULL DEFAULT 1,
   unit_price DECIMAL(10,2) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+<<<<<<< HEAD
   FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE RESTRICT
+=======
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE RESTRICT
+>>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea
 );
 
 -- Sessions (if you want DB-based sessions instead of PHP default files)
@@ -118,4 +134,8 @@ CREATE TABLE sessions (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_events_start ON events(start_datetime);
 CREATE INDEX idx_tickets_event ON tickets(event_id);
+<<<<<<< HEAD
 CREATE INDEX idx_orders_user ON orders(user_id);
+=======
+CREATE INDEX idx_orders_user ON orders(user_id);
+>>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea

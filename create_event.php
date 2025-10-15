@@ -4,18 +4,28 @@ require_once 'DB/database.php';
 require_once 'session/session_manager.php';
 
 $session = new SessionManager($conf);
-// $session->requireLogin('forms.html'); // Redirect to login if not logged in
+$session->requireLogin('forms.html'); // Redirect to login if not logged in
 $organizer_id = $session->getUserId();
 
-
+// Set up navigation variables
+$isLoggedIn = $session->isLoggedIn();
+$userName = $isLoggedIn ? $session->getUsername() : '';
+$userRole = $isLoggedIn ? $session->getRoleId() : 0;
+$currentPage = 'create'; // Set current page for active nav highlighting
+// Clear old session messages
+$session->clearErrors();
+$session->getMessage('msg'); // Clear old messages
+$session->getMessage('success');
+$session->getMessage('error');
 // Collect and sanitize form data
-$venue_id = $_POST['venue_id'] ?? null;
+$venue = trim($_POST['venue'] ?? '');
 $title = trim($_POST['title'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $start_datetime = $_POST['start_datetime'] ?? null;
 $end_datetime = $_POST['end_datetime'] ?? null;
 $status = $_POST['status'] ?? 'draft';
 $capacity = $_POST['capacity'] ?? null;
+$category_id = $_POST['category_id'] ?? null;
 
 // Basic validation
 $errors = [];
@@ -33,24 +43,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $db = new Database($conf);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
-    $sql = "INSERT INTO events (organizer_id, venue_id, title, description, start_datetime, end_datetime, status, capacity)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    try {
-        $db->query($sql, [
-            $organizer_id,
-            $venue_id ?: null,
-            $title,
-            $description,
-            $start_datetime,
-            $end_datetime ?: null,
-            $status,
-            $capacity ?: null
-        ]);
-        $session->setMessage('success', 'Event created successfully!');
-       
-        header('Location: create_event.php'); exit;
-    } catch (Exception $e) {
-        $session->setMessage('error', 'Database error: '.htmlspecialchars($e->getMessage()));
+    // Handle image upload
+    $image_url = null;
+    if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = 'uploads/events/';
+        $file_extension = strtolower(pathinfo($_FILES['event_image']['name'], PATHINFO_EXTENSION));
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        
+        if (in_array($file_extension, $allowed_extensions)) {
+            $filename = 'event_' . time() . '_' . uniqid() . '.' . $file_extension;
+            $upload_path = $upload_dir . $filename;
+            
+            if (move_uploaded_file($_FILES['event_image']['tmp_name'], $upload_path)) {
+                $image_url = $upload_path;
+            } else {
+                $errors[] = 'Failed to upload image.';
+            }
+        } else {
+            $errors[] = 'Invalid image format. Please upload JPG, PNG, GIF, or WebP files.';
+        }
+    }
+    
+    if (empty($errors)) {
+        $sql = "INSERT INTO events (organizer_id, title, description, venue, start_datetime, end_datetime, status, capacity, category_id, image_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            $db->query($sql, [
+                $organizer_id,
+                $title,
+                $description,
+                $venue ?: null,
+                $start_datetime,
+                $end_datetime ?: null,
+                $status,
+                $capacity ?: null,
+                $category_id ?: null,
+                $image_url
+            ]);
+            $session->setMessage('success', 'Event created successfully!');
+           
+            header('Location: create_event.php'); exit;
+        } catch (Exception $e) {
+            $session->setMessage('error', 'Database error: '.htmlspecialchars($e->getMessage()));
+        }
     }
 }
 ?>
@@ -60,17 +95,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Event - Multi-Step Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="event-body">
+    <!-- Navbar -->
+    <?php include 'components/navbar.php'; ?>
+    
     <div class="event-container">
         <div class="eventform-header">
             <h1>Create New Event</h1>
             <p>Fill in the details to create your event</p>
         </div>
         <div class="eventform-container">
-        
+            <!-- DEBUG OUTPUT: Remove after testing -->
+            <div style="background:#f9f9f9;border:1px solid #ccc;padding:10px;margin-bottom:1em;font-size:0.95em;">
+                <strong>DEBUG INFO</strong><br>
+                <b>POST Data:</b>
+                <pre><?php print_r($_POST); ?></pre>
+                <b>Session Data:</b>
+                <pre><?php print_r($_SESSION); ?></pre>
+            </div>
             <?php
             // Show error messages if any
             $errors = $session->getErrors();
@@ -92,11 +139,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
                 $user = $db->fetchOne("SELECT full_name, email, phone FROM users WHERE id = ?", [$organizer_id]);
             }
             ?>
-            <form id="event-form" action="create_event.php" method="POST">
+            <form id="event-form" action="create_event.php" method="POST" enctype="multipart/form-data">
                 <!-- Step 1: Organizer Info -->
                 <div class="form-step" id="step-1">
                     <h2>Organizer Info</h2>
-                    <input type="hidden" name="organizer_id" value="<?php echo htmlspecialchars($user_id); ?>">
+                    <input type="hidden" name="organizer_id" value="<?php echo htmlspecialchars($organizer_id); ?>">
                     <div class="form-group">
                         <label for="organizer_name">Organizer Name</label>
                         <input type="text" id="organizer_name" name="organizer_name" value="<?php echo htmlspecialchars($user['full_name'] ?? ''); ?>" readonly>
@@ -127,11 +174,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
                         <select id="venue_id" name="venue_id">
                             <option value="">Select Venue (Optional)</option>
                             <option value="1">Nairobi Concert Hall - 123 Main Street, Nairobi (Capacity: 5000)</option>
+                            <option value="2">Uhuru Gardens - Uhuru Highway, Nairobi (Capacity: 10000)</option>
+                            <option value="3">Beer District - Westlands, Nairobi (Capacity: 2000)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="capacity">Event Capacity</label>
                         <input type="number" id="capacity" name="capacity" min="1" max="100000" placeholder="Maximum number of attendees">
+                    </div>
+                    <div class="form-group">
+                        <label for="event_image">Event Image</label>
+                        <input type="file" id="event_image" name="event_image" accept="image/*">
+                        <small class="form-text text-muted">Upload JPG, PNG, GIF, or WebP image (max 5MB)</small>
                     </div>
                     <button type="button" class="btn-primary" id="prev-2">Previous</button>
                     <button type="button" class="btn-primary" id="next-2">Next</button>
@@ -148,15 +202,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
                         <input type="datetime-local" id="end_datetime" name="end_datetime">
                     </div>
                     <div class="form-group">
-                        <label for="categories">Event Categories</label>
-                        <div class="checkbox-group" id="categories">
-                            <label class="checkbox-item"><input type="checkbox" name="categories[]" value="1"> Music</label>
-                            <label class="checkbox-item"><input type="checkbox" name="categories[]" value="2"> Business & Networking</label>
-                            <label class="checkbox-item"><input type="checkbox" name="categories[]" value="3"> Technology & Innovation</label>
-                            <label class="checkbox-item"><input type="checkbox" name="categories[]" value="4"> Arts & Culture</label>
-                            <label class="checkbox-item"><input type="checkbox" name="categories[]" value="5"> Sports & Fitness</label>
-                            <label class="checkbox-item"><input type="checkbox" name="categories[]" value="6"> Education & Learning</label>
-                        </div>
+                        <label for="category_id">Event Category <span class="required">*</span></label>
+                        <select id="category_id" name="category_id" required>
+                            <option value="">Select Category</option>
+                            <option value="1">Music</option>
+                            <option value="2">Conference</option>
+                            <option value="3">Meetup</option>
+                            <option value="4">Sports</option>
+                            <option value="5">Workshop</option>
+                            <option value="6">Exhibition</option>
+                            <option value="7">Festival</option>
+                            <option value="8">Other</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="status">Event Status <span class="required">*</span></label>

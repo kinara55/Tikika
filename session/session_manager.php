@@ -86,6 +86,10 @@ class SessionManager {
         return $errors;
     }
     
+    public function clearErrors() {
+        unset($_SESSION['errors']);
+    }
+    
     private function checkSessionTimeout() {
         if (isset($_SESSION['login_time'])) {
             $timeout = $this->conf['session_timeout'] ?? 3600;
