@@ -35,14 +35,14 @@ $conf['event_categories'] = [
 $conf['DB_TYPE'] = 'mysqli';
 $conf['DB_HOST'] = 'localhost';
 $conf['DB_USER'] = 'root';
-$conf['DB_PASS'] = ''; 
+$conf['DB_PASS'] = 'Mu8ndAma'; 
 $conf['DB_NAME'] = 'tikika_db';
 
 // Email configuration
 $conf['mail_type'] = 'smtp'; // mail or smtp
 $conf['smtp_host'] = 'smtp.gmail.com'; // SMTP Host Address
-$conf['smtp_user'] = 'bridgetwanyama0@gmail.com'; // SMTP Username
-$conf['smtp_pass'] = ''; // SMTP Password
+$conf['smtp_user'] = 'leokinara@gmail.com'; // SMTP Username
+$conf['smtp_pass'] = 'mbtl srvw ljle uyqg'; // SMTP Password
 $conf['smtp_port'] = 587; // SMTP Port - 587 for tls, 465 for ssl
 $conf['smtp_secure'] = 'tls'; // Encryption - ssl or tls
 

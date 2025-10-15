@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Event - Multi-Step Form</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="event-body">
     <div class="event-container">
@@ -69,14 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
             <p>Fill in the details to create your event</p>
         </div>
         <div class="eventform-container">
-            <!-- DEBUG OUTPUT: Remove after testing -->
-            <div style="background:#f9f9f9;border:1px solid #ccc;padding:10px;margin-bottom:1em;font-size:0.95em;">
-                <strong>DEBUG INFO</strong><br>
-                <b>POST Data:</b>
-                <pre><?php print_r($_POST); ?></pre>
-                <b>Session Data:</b>
-                <pre><?php print_r($_SESSION); ?></pre>
-            </div>
+        
             <?php
             // Show error messages if any
             $errors = $session->getErrors();

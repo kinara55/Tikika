@@ -22,9 +22,9 @@ $phone=
 $errors = [];
 
 // Username: 3-30 chars, letters, numbers, underscore only
-if ($username === '') {
-    $errors[] = 'Username is required';
-} elseif (!preg_match('/^[A-Za-z0-9_]{3,30}$/', $username)) {
+if ($full_name === '') {
+    $errors[] = 'Full name is required';
+} elseif (!preg_match('/^[A-Za-z0-9_]{3,30}$/', $full_name)) {
     $errors[] = 'Username must be 3-30 characters (letters, numbers, underscore)';
 }
 
@@ -58,7 +58,7 @@ if (empty($errors)) {
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     $sql = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
     try {
-        $db->query($sql, [$username, $email, $passwordHash]);
+        $db->query($sql, [$full_name, $email, $passwordHash]);
     } catch (Exception $e) {
         $errors[] = "Database error: " . $e->getMessage();
     }
