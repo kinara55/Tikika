@@ -46,6 +46,8 @@ $conf['smtp_pass'] = ''; // SMTP Password
 $conf['smtp_port'] = 587; // SMTP Port - 587 for tls, 465 for ssl
 $conf['smtp_secure'] = 'tls'; // Encryption - ssl or tls
 
+$conf['stripe_secret_key']= '';
+
 // Valid email domains for registration
 $conf['valid_domain'] = ['gmail.com', 'yahoo.com', 'outlook.com', 'strathmore.edu', 'hotmail.com'];
 
