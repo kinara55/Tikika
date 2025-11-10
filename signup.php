@@ -22,19 +22,11 @@ $role_id = (int)($_POST['role_id'] ?? 3); // Default to Attendee if not selected
 
 $errors = [];
 
-<<<<<<< HEAD
-// Username: 3-30 chars, letters, numbers, underscore only
-if ($full_name === '') {
-    $errors[] = 'Full name is required';
-} elseif (!preg_match('/^[A-Za-z0-9_]{3,30}$/', $full_name)) {
-    $errors[] = 'Username must be 3-30 characters (letters, numbers, underscore)';
-=======
 // Full name validation
 if ($full_name === '') {
     $errors[] = 'Full name is required';
 } elseif (strlen($full_name) < 2) {
     $errors[] = 'Full name must be at least 2 characters long';
->>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea
 }
 
 // Email format
@@ -88,18 +80,6 @@ if ($password === '') {
 // If no errors, save user to database
 if (empty($errors)) {
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-<<<<<<< HEAD
-}
-
-
-if (empty($errors)) {
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
-    try {
-        $db->query($sql, [$full_name, $email, $passwordHash]);
-    } catch (Exception $e) {
-        $errors[] = "Database error: " . $e->getMessage();
-=======
     
     // Check if email already exists
     $existingUser = $db->fetchOne("SELECT id FROM users WHERE email = ?", [$email]);
@@ -167,7 +147,6 @@ if (empty($errors)) {
         } catch (Exception $e) {
             $errors[] = "Database error: " . $e->getMessage();
         }
->>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea
     }
 }
 // Output minimal HTML response with results

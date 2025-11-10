@@ -132,8 +132,9 @@ $events = $db->fetchAll("SELECT * FROM events");
           <?php foreach ($events as $event): ?>
           <tr>
             <td><?= htmlspecialchars($event['id']) ?></td>
-            <td><?= htmlspecialchars($event['name']) ?></td>
-            <td><?= htmlspecialchars($event['details']) ?></td>
+            <td><?= htmlspecialchars($event['title']) ?></td>
+            <td><?= htmlspecialchars($event['description']) ?></td>
+            
             <td><?= htmlspecialchars($event['date'] ?? 'N/A') ?></td>
           </tr>
           <?php endforeach; ?>
