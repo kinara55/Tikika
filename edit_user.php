@@ -5,13 +5,14 @@ if (!isset($_SESSION['role_id']) || (int)$_SESSION['role_id'] !== 1) {
     exit();
 }
 
+require_once __DIR__ . '/conf.php';
 include 'DB/database.php';
 
 $db_conf = [
-    'DB_HOST' => 'localhost',
-    'DB_USER' => 'root',
-    'DB_PASS' => '', 
-    'DB_NAME' => 'tikika_db'
+    'DB_HOST' => $conf['DB_HOST'],
+    'DB_USER' => $conf['DB_USER'],
+    'DB_PASS' => $conf['DB_PASS'],
+    'DB_NAME' => $conf['DB_NAME']
 ];
 
 $db = new Database($db_conf);
