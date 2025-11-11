@@ -9,11 +9,6 @@ INSERT IGNORE INTO `users` (`id`, `role_id`, `full_name`, `email`, `password_has
 VALUES (1, 2, 'Sample Organizer', 'organizer@example.com', 'hashed_password_here', '0712345678');
 
 
-#Sample category
-INSERT IGNORE INTO `categories` (`id`, `name`, `description`)
-VALUES (1, 'Music', 'Concerts and music shows');
-
-
 #Sample events (matching buy_ticket.php hardcoded data)
 INSERT IGNORE INTO `events` (`id`, `organizer_id`, `title`, `description`, `venue`, `start_datetime`, `end_datetime`, `status`, `capacity`, `category_id`)
 VALUES 

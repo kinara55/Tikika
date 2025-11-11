@@ -26,6 +26,7 @@ $end_datetime = $_POST['end_datetime'] ?? null;
 $status = $_POST['status'] ?? 'draft';
 $capacity = $_POST['capacity'] ?? null;
 $category_id = $_POST['category_id'] ?? null;
+$price = $_POST['price'] ?? null;
 
 // Basic validation
 $errors = [];
@@ -46,14 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
     // Handle image upload
     $image_url = null;
     if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = 'uploads/events/';
+        $upload_dir = 'images/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
         $file_extension = strtolower(pathinfo($_FILES['event_image']['name'], PATHINFO_EXTENSION));
         $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        
         if (in_array($file_extension, $allowed_extensions)) {
             $filename = 'event_' . time() . '_' . uniqid() . '.' . $file_extension;
             $upload_path = $upload_dir . $filename;
-            
             if (move_uploaded_file($_FILES['event_image']['tmp_name'], $upload_path)) {
                 $image_url = $upload_path;
             } else {
@@ -63,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
             $errors[] = 'Invalid image format. Please upload JPG, PNG, GIF, or WebP files.';
         }
     }
-    
     if (empty($errors)) {
         $sql = "INSERT INTO events (organizer_id, title, description, venue, start_datetime, end_datetime, status, capacity, category_id, image_url)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -80,8 +81,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
                 $category_id ?: null,
                 $image_url
             ]);
+            $event_id = $db->getConnection()->insert_id;
+if (!empty($_POST['ticket_type']) && is_array($_POST['ticket_type'])) {
+    foreach ($_POST['ticket_type'] as $i => $type) {
+        $ticket_type = trim($type);
+        $ticket_price = $_POST['ticket_price'][$i] ?? 0.00;
+        $ticket_quantity = $_POST['ticket_quantity'][$i] ?? 0;
+        if ($ticket_type && $ticket_quantity > 0) {
+            $db->query(
+                "INSERT INTO tickets (event_id, type, price, quantity, sold) VALUES (?, ?, ?, ?, 0)",
+                [$event_id, $ticket_type, $ticket_price, $ticket_quantity]
+            );
+        }
+    }
+}
             $session->setMessage('success', 'Event created successfully!');
-           
             header('Location: create_event.php'); exit;
         } catch (Exception $e) {
             $session->setMessage('error', 'Database error: '.htmlspecialchars($e->getMessage()));
@@ -210,26 +224,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
                             <option value="3">Meetup</option>
                             <option value="4">Sports</option>
                             <option value="5">Workshop</option>
-                            <option value="6">Exhibition</option>
-                            <option value="7">Festival</option>
-                            <option value="8">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="status">Event Status <span class="required">*</span></label>
-                        <select id="status" name="status" required>
-                            <option value="draft">Draft</option>
-                            <option value="published">Published</option>
-                            <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
                     <button type="button" class="btn-primary" id="prev-3">Previous</button>
-                    <button type="submit" class="btn-primary">Create Event</button>
+                    <button type="button" class="btn-primary" id="next-3">Next</button>
                 </div>
+                <!-- Step 4: Tickets -->
+<div class="form-step" id="step-4" style="display:none;">
+    <h2>Tickets</h2>
+    <div id="ticket-types">
+        <div class="ticket-type-group">
+            <label>Type</label>
+            <input type="text" name="ticket_type[]" value="VVIP" required>
+            <label>Price (Ksh)</label>
+            <input type="number" name="ticket_price[]" min="0" step="0.01" placeholder="e.g. 5000" required>
+            <label>Quantity</label>
+            <input type="number" name="ticket_quantity[]" min="1" step="1" placeholder="e.g. 50" required>
+            <button type="button" class="btn btn-sm btn-danger remove-ticket-type" style="margin-left:10px;">Remove</button>
+        </div>
+        <div class="ticket-type-group">
+            <label>Type</label>
+            <input type="text" name="ticket_type[]" value="VIP" required>
+            <label>Price (Ksh)</label>
+            <input type="number" name="ticket_price[]" min="0" step="0.01" placeholder="e.g. 3000" required>
+            <label>Quantity</label>
+            <input type="number" name="ticket_quantity[]" min="1" step="1" placeholder="e.g. 100" required>
+            <button type="button" class="btn btn-sm btn-danger remove-ticket-type" style="margin-left:10px;">Remove</button>
+        </div>
+        <div class="ticket-type-group">
+            <label>Type</label>
+            <input type="text" name="ticket_type[]" value="Regular" required>
+            <label>Price (Ksh)</label>
+            <input type="number" name="ticket_price[]" min="0" step="0.01" placeholder="e.g. 1500" required>
+            <label>Quantity</label>
+            <input type="number" name="ticket_quantity[]" min="1" step="1" placeholder="e.g. 200" required>
+            <button type="button" class="btn btn-sm btn-danger remove-ticket-type" style="margin-left:10px;">Remove</button>
+        </div>
+    </div>
+    <button type="button" class="btn btn-secondary" id="add-ticket-type" style="margin-top:10px;">Add Ticket Type</button>
+    <button type="button" class="btn-primary" id="prev-4">Previous</button>
+    <button type="submit" class="btn-primary">Create Event</button>
+</div>
             </form>
         </div>
     </div>
     <script>
+        // Debug: Confirm form submission
+        document.getElementById('event-form').addEventListener('submit', function(e) {
+            alert('Form is being submitted!');
+        });
         // Multi-step navigation
         document.getElementById('next-1').onclick = function() {
             document.getElementById('step-1').style.display = 'none';
@@ -247,6 +290,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
             document.getElementById('step-3').style.display = 'none';
             document.getElementById('step-2').style.display = 'block';
         };
+        document.getElementById('next-3').onclick = function() {
+    document.getElementById('step-3').style.display = 'none';
+    document.getElementById('step-4').style.display = 'block';
+};
+document.getElementById('prev-4').onclick = function() {
+    document.getElementById('step-4').style.display = 'none';
+    document.getElementById('step-3').style.display = 'block';
+};
+// Add/remove ticket type fields
+document.getElementById('add-ticket-type').onclick = function() {
+    var container = document.getElementById('ticket-types');
+    var group = document.createElement('div');
+    group.className = 'ticket-type-group';
+    group.innerHTML = `<label>Type</label><input type="text" name="ticket_type[]" placeholder="e.g. VIP" required>
+        <label>Price (Ksh)</label><input type="number" name="ticket_price[]" min="0" step="0.01" placeholder="e.g. 3000" required>
+        <label>Quantity</label><input type="number" name="ticket_quantity[]" min="1" step="1" placeholder="e.g. 50" required>
+        <button type="button" class="btn btn-sm btn-danger remove-ticket-type" style="margin-left:10px;">Remove</button>`;
+    container.appendChild(group);
+};
+document.getElementById('ticket-types').addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-ticket-type')) {
+        e.target.parentElement.remove();
+    }
+});
     </script>
 </body>
 </html>
