@@ -34,6 +34,17 @@ VALUES
 (3, 'Regular', 1000.00, 300, 0),
 (3, 'VIP', 2000.00, 100, 0),
 (3, 'VVIP', 3000.00, 50, 0);
-```
+
+
+-- Insert default categories to match create_event.php form
+INSERT INTO categories (id, name, description) VALUES
+  (1, 'Music', 'Music events and concerts'),
+  (2, 'Conference', 'Business and professional conferences'),
+  (3, 'Meetup', 'Social and networking meetups'),
+  (4, 'Sports', 'Sports events and competitions'),
+  (5, 'Workshop', 'Educational and training workshops'),
+  (6, 'Exhibition', 'Exhibitions and expos'),
+  (7, 'Festival', 'Festivals and celebrations'),
+  (8, 'Other', 'Other event types');
 
 
