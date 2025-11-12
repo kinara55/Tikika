@@ -87,9 +87,17 @@ try {
         'order_id' => $orderId,
         'session_id' => $checkout_session->id
     ];
+} catch (\Stripe\Exception\ApiErrorException $e) {
+    // Stripe API error
+    error_log("Stripe Error: " . $e->getMessage());
+    $sessionManager->setMessage('msg', '<div style="color: #e74c3c; margin-bottom: 1rem;">Payment error: ' . htmlspecialchars($e->getMessage()) . '</div>');
+    header('Location: cart.php');
+    exit;
 } catch (Exception $e) {
-    $sessionManager->setMessage('msg', '<div style="color: #e74c3c; margin-bottom: 1rem;">Error creating payment session. Please try again.</div>');
-    header('Location: events.php');
+    // General error
+    error_log("Payment Process Error: " . $e->getMessage());
+    $sessionManager->setMessage('msg', '<div style="color: #e74c3c; margin-bottom: 1rem;">Error creating payment session. Please try again. Error: ' . htmlspecialchars($e->getMessage()) . '</div>');
+    header('Location: cart.php');
     exit;
 }
 // Redirect to the checkout session URL

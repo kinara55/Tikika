@@ -9,28 +9,42 @@ $userName = $isLoggedIn ? $sessionManager->getUsername() : '';
 $userRole = $isLoggedIn ? $sessionManager->getRoleId() : 0;
 $currentPage = 'home'; // Set current page for active nav highlighting
 
-// TODO: Replace the hardcoded $events array below with a database fetch (e.g., from MySQL) for production use.
 
 require_once 'DB/database.php';
 $db = new Database($conf);
 
 // Fetch events from DB
-$events = $db->fetchAll("SELECT id, title, start_datetime, capacity, image_url, price FROM events ORDER BY start_datetime ASC");
+$events = $db->fetchAll("SELECT id, title, start_datetime, capacity, image_url FROM events ORDER BY start_datetime ASC");
 
-// For each event, check if tickets are sold out
+// For each event, check if tickets are sold out and get minimum price
 foreach ($events as &$event) {
     $ticket = $db->fetchOne("SELECT SUM(quantity - sold) AS available FROM tickets WHERE event_id = ?", [$event['id']]);
     $event['sold_out'] = ($ticket['available'] ?? 0) <= 0;
+    
+    // Get minimum ticket price for this event
+    $minPrice = $db->fetchOne("SELECT MIN(price) AS min_price FROM tickets WHERE event_id = ?", [$event['id']]);
+    $event['price'] = $minPrice['min_price'] ?? null;
 }
 
 // Format events for display
 $formattedEvents = [];
+$defaultImages = ['images/image1.jpg', 'images/image2.jpg', 'images/image3.jpg'];
+$imageIndex = 0;
+
 foreach ($events as $event) {
+    // Use event image if available, otherwise use a default image
+    $imageUrl = $event['image_url'];
+    if (empty($imageUrl) || !file_exists($imageUrl)) {
+        // Cycle through default images
+        $imageUrl = $defaultImages[$imageIndex % count($defaultImages)];
+        $imageIndex++;
+    }
+    
     $formattedEvents[$event['id']] = [
         'title' => $event['title'],
         'date' => date('M d, Y', strtotime($event['start_datetime'])),
-        'price' => isset($event['price']) ? 'Ksh ' . number_format($event['price']) : (isset($event['capacity']) ? 'Ksh ' . number_format($event['capacity']) : 'Free'),
-        'image' => $event['image_url'] ?? 'images/default.jpg'
+        'price' => $event['price'] ? 'Ksh ' . number_format($event['price']) : 'Free',
+        'image' => $imageUrl
     ];
 }
 $events = $formattedEvents;

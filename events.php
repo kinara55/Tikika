@@ -13,12 +13,16 @@ require_once 'DB/database.php';
 $db = new Database($conf);
 
 // Fetch events from DB
-$events = $db->fetchAll("SELECT id, title, description, venue, start_datetime, end_datetime, status, capacity, category_id, image_url, price FROM events ORDER BY start_datetime ASC");
+$events = $db->fetchAll("SELECT id, title, description, venue, start_datetime, end_datetime, status, capacity, category_id, image_url FROM events ORDER BY start_datetime ASC");
 
-// For each event, check if tickets are sold out
+// For each event, check if tickets are sold out and get minimum price
 foreach ($events as &$event) {
     $ticket = $db->fetchOne("SELECT SUM(quantity - sold) AS available FROM tickets WHERE event_id = ?", [$event['id']]);
     $event['sold_out'] = ($ticket['available'] ?? 0) <= 0;
+    
+    // Get minimum ticket price for this event
+    $minPrice = $db->fetchOne("SELECT MIN(price) AS min_price FROM tickets WHERE event_id = ?", [$event['id']]);
+    $event['price'] = $minPrice['min_price'] ?? null;
 }
 ?>
 <!DOCTYPE html>
@@ -139,7 +143,16 @@ foreach ($events as &$event) {
       <?php foreach($events as $event): ?>
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="event-card">
-          <img src="<?php echo htmlspecialchars($event['image_url'] ?? 'images/default.jpg'); ?>" class="event-image" alt="<?php echo htmlspecialchars($event['title']); ?>">
+          <?php
+          // Use event image if available, otherwise use a default image
+          $imageUrl = $event['image_url'];
+          if (empty($imageUrl) || !file_exists($imageUrl)) {
+              // Use a default image based on event ID
+              $defaultImages = ['images/image1.jpg', 'images/image2.jpg', 'images/image3.jpg'];
+              $imageUrl = $defaultImages[($event['id'] - 1) % count($defaultImages)];
+          }
+          ?>
+          <img src="<?php echo htmlspecialchars($imageUrl); ?>" class="event-image" alt="<?php echo htmlspecialchars($event['title']); ?>">
           <h3><?php echo htmlspecialchars($event['title']); ?></h3>
           <p class="text-muted"><?php echo htmlspecialchars($event['description']); ?></p>
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -151,7 +164,7 @@ foreach ($events as &$event) {
             </small>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="h4 text-danger mb-0">Ksh <?php echo number_format($event['price'], 2); ?></span>
+            <span class="h4 text-danger mb-0"><?php echo $event['price'] ? 'Ksh ' . number_format($event['price'], 2) : 'Free'; ?></span>
             <?php if ($event['sold_out']): ?>
               <span class="badge bg-danger">Sold Out</span>
             <?php endif; ?>
