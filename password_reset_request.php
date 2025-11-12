@@ -59,7 +59,6 @@ $user = $db->fetchOne(
     [$identifier, $identifier]
 );
 
-// To avoid user enumeration, always proceed silently
 if ($user) {
     // Generate 6-digit code
     $code = (string)random_int(100000, 999999);

@@ -18,7 +18,15 @@ $session->getMessage('msg'); // Clear old messages
 $session->getMessage('success');
 $session->getMessage('error');
 // Collect and sanitize form data
-$venue = trim($_POST['venue'] ?? '');
+$venue_id = $_POST['venue_id'] ?? '';
+$venue = '';
+if ($venue_id == '1') {
+    $venue = 'Nairobi Concert Hall';
+} elseif ($venue_id == '2') {
+    $venue = 'Uhuru Gardens';
+} elseif ($venue_id == '3') {
+    $venue = 'Beer District';
+}
 $title = trim($_POST['title'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $start_datetime = $_POST['start_datetime'] ?? null;
@@ -26,13 +34,12 @@ $end_datetime = $_POST['end_datetime'] ?? null;
 $status = $_POST['status'] ?? 'draft';
 $capacity = $_POST['capacity'] ?? null;
 $category_id = $_POST['category_id'] ?? null;
-$price = $_POST['price'] ?? null;
 
 // Basic validation
 $errors = [];
 if (!$title) $errors[] = 'Event title is required.';
 if (!$start_datetime) $errors[] = 'Start date/time is required.';
-if (!$status) $errors[] = 'Event status is required.';
+if (!$category_id) $errors[] = 'Event category is required.';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($errors)) {
@@ -43,7 +50,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $db = new Database($conf);
+
+$categories = $db->fetchAll("SELECT id, name FROM categories ORDER BY name");
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
+    $categoryExists = false;
+    if ($category_id) {
+        $categoryCheck = $db->fetchOne("SELECT id FROM categories WHERE id = ?", [$category_id]);
+        if ($categoryCheck) {
+            $categoryExists = true;
+        } else {
+            $errors[] = 'Selected category does not exist.';
+            $category_id = null;
+        }
+    }
     // Handle image upload
     $image_url = null;
     if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] === UPLOAD_ERR_OK) {
@@ -77,27 +97,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
                 $start_datetime,
                 $end_datetime ?: null,
                 $status,
-                $capacity ?: null,
-                $category_id ?: null,
+                $capacity ? ($capacity > 0 ? $capacity : null) : null,
+                ($category_id && $categoryExists) ? (int)$category_id : null,
                 $image_url
             ]);
             $event_id = $db->getConnection()->insert_id;
-if (!empty($_POST['ticket_type']) && is_array($_POST['ticket_type'])) {
-    foreach ($_POST['ticket_type'] as $i => $type) {
-        $ticket_type = trim($type);
-        $ticket_price = $_POST['ticket_price'][$i] ?? 0.00;
-        $ticket_quantity = $_POST['ticket_quantity'][$i] ?? 0;
-        if ($ticket_type && $ticket_quantity > 0) {
-            $db->query(
-                "INSERT INTO tickets (event_id, type, price, quantity, sold) VALUES (?, ?, ?, ?, 0)",
-                [$event_id, $ticket_type, $ticket_price, $ticket_quantity]
-            );
-        }
-    }
-}
-            $session->setMessage('success', 'Event created successfully!');
-            header('Location: create_event.php'); exit;
+            
+            if (!empty($_POST['ticket_type']) && is_array($_POST['ticket_type'])) {
+                foreach ($_POST['ticket_type'] as $i => $type) {
+                    $ticket_type = trim($type);
+                    $ticket_price = $_POST['ticket_price'][$i] ?? 0.00;
+                    $ticket_quantity = $_POST['ticket_quantity'][$i] ?? 0;
+                    if ($ticket_type && $ticket_quantity > 0) {
+                        $db->query(
+                            "INSERT INTO tickets (event_id, type, price, quantity, sold) VALUES (?, ?, ?, ?, 0)",
+                            [$event_id, $ticket_type, $ticket_price, $ticket_quantity]
+                        );
+                    }
+                }
+            }
+            
+            $session->setMessage('success', 'Event created successfully! Event ID: ' . $event_id);
+            header('Location: events.php');
+            exit;
         } catch (Exception $e) {
+            error_log("Event creation error: " . $e->getMessage());
             $session->setMessage('error', 'Database error: '.htmlspecialchars($e->getMessage()));
         }
     }
@@ -124,14 +148,6 @@ if (!empty($_POST['ticket_type']) && is_array($_POST['ticket_type'])) {
             <p>Fill in the details to create your event</p>
         </div>
         <div class="eventform-container">
-            <!-- DEBUG OUTPUT: Remove after testing -->
-            <div style="background:#f9f9f9;border:1px solid #ccc;padding:10px;margin-bottom:1em;font-size:0.95em;">
-                <strong>DEBUG INFO</strong><br>
-                <b>POST Data:</b>
-                <pre><?php print_r($_POST); ?></pre>
-                <b>Session Data:</b>
-                <pre><?php print_r($_SESSION); ?></pre>
-            </div>
             <?php
             // Show error messages if any
             $errors = $session->getErrors();
@@ -219,12 +235,21 @@ if (!empty($_POST['ticket_type']) && is_array($_POST['ticket_type'])) {
                         <label for="category_id">Event Category <span class="required">*</span></label>
                         <select id="category_id" name="category_id" required>
                             <option value="">Select Category</option>
-                            <option value="1">Music</option>
-                            <option value="2">Conference</option>
-                            <option value="3">Meetup</option>
-                            <option value="4">Sports</option>
-                            <option value="5">Workshop</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                            <?php endforeach; ?>
                         </select>
+                        <?php if (empty($categories)): ?>
+                            <small class="text-danger">No categories available. Please contact admin.</small>
+                        <?php endif; ?>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Event Status <span class="required">*</span></label>
+                        <select id="status" name="status" required>
+                            <option value="draft" selected>Draft (Hidden from public)</option>
+                            <option value="published">Published (Visible to public)</option>
+                        </select>
+                        <small class="form-text text-muted">Draft events are only visible to you. Published events appear on the public events page.</small>
                     </div>
                     <button type="button" class="btn-primary" id="prev-3">Previous</button>
                     <button type="button" class="btn-primary" id="next-3">Next</button>
@@ -269,10 +294,6 @@ if (!empty($_POST['ticket_type']) && is_array($_POST['ticket_type'])) {
         </div>
     </div>
     <script>
-        // Debug: Confirm form submission
-        document.getElementById('event-form').addEventListener('submit', function(e) {
-            alert('Form is being submitted!');
-        });
         // Multi-step navigation
         document.getElementById('next-1').onclick = function() {
             document.getElementById('step-1').style.display = 'none';

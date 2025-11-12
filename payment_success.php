@@ -22,9 +22,15 @@ try {
     $stripe_session = \Stripe\Checkout\Session::retrieve($sessionId);
       // Status is an object in stripe api that has multiple statuses 
     if ($stripe_session->payment_status === 'paid') {
-        // Update order status in the database
         $db->update('orders', ['status' => 'paid'], 'id = ?', [$orderId]);
-        // Refreshing the cart after successful payment
+        
+        $itemsToUpdate = $db->fetchAll("SELECT event_id, ticket_type, quantity FROM order_items WHERE order_id = ?", [$orderId]);
+        foreach ($itemsToUpdate as $item) {
+            $db->query("UPDATE tickets SET sold = sold + ? WHERE event_id = ? AND LOWER(type) = LOWER(?)", 
+                [$item['quantity'], $item['event_id'], $item['ticket_type']]);
+        }
+        
+        unset($_SESSION['cart']);
         unset($_SESSION['cartItems']);
         
         $paymentSuccess = true;

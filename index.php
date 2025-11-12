@@ -13,8 +13,8 @@ $currentPage = 'home'; // Set current page for active nav highlighting
 require_once 'DB/database.php';
 $db = new Database($conf);
 
-// Fetch events from DB
-$events = $db->fetchAll("SELECT id, title, start_datetime, capacity, image_url FROM events ORDER BY start_datetime ASC");
+// Fetch events from DB (only published events on homepage)
+$events = $db->fetchAll("SELECT id, title, start_datetime, capacity, image_url FROM events WHERE status = 'published' ORDER BY start_datetime ASC");
 
 // For each event, check if tickets are sold out and get minimum price
 foreach ($events as &$event) {

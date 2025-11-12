@@ -44,8 +44,11 @@ $currentPage = $currentPage ?? 'home';
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="cart.php"><i class="fas fa-shopping-cart me-2"></i>My Cart</a></li>
-              <?php if ($userRole == 1 ): ?>
+              <?php if ($userRole == 1): ?>
               <li><a class="dropdown-item" href="admin_dashboard.php"><i class="fas fa-cog me-2"></i>Admin Panel</a></li>
+              <?php endif; ?>
+              <?php if ($userRole == 2): ?>
+              <li><a class="dropdown-item" href="organizer_dashboard.php"><i class="fas fa-calendar-alt me-2"></i>Organizer Panel</a></li>
               <?php endif; ?>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
