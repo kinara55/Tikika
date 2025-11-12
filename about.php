@@ -99,7 +99,7 @@ $currentPage = 'about'; // Set current page for active nav highlighting
       </div>
       <div class="col-md-4">
         <div class="info-box">
-          <h3>🎟 Book</h3>
+          <h3>🎟 Book</h3> 
           <p>Secure your tickets easily with our user-friendly booking system.</p>
         </div>
       </div>
@@ -120,5 +120,6 @@ $currentPage = 'about'; // Set current page for active nav highlighting
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
 
 
