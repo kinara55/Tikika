@@ -12,18 +12,30 @@ $currentPage = 'events'; // Set current page for active nav highlighting
 require_once 'DB/database.php';
 $db = new Database($conf);
 
-// Fetch events from DB
-$events = $db->fetchAll("SELECT id, title, description, venue, start_datetime, end_datetime, status, capacity, category_id, image_url FROM events ORDER BY start_datetime ASC");
+// Fetch events from DB (show published and draft events)
+$events = $db->fetchAll("SELECT id, title, description, venue, start_datetime, end_datetime, status, capacity, category_id, image_url FROM events WHERE status IN ('published', 'draft') ORDER BY start_datetime ASC");
+
+// Debug: Log event count
+error_log("Events found: " . count($events));
 
 // For each event, check if tickets are sold out and get minimum price
-foreach ($events as &$event) {
-    $ticket = $db->fetchOne("SELECT SUM(quantity - sold) AS available FROM tickets WHERE event_id = ?", [$event['id']]);
-    $event['sold_out'] = ($ticket['available'] ?? 0) <= 0;
-    
-    // Get minimum ticket price for this event
-    $minPrice = $db->fetchOne("SELECT MIN(price) AS min_price FROM tickets WHERE event_id = ?", [$event['id']]);
-    $event['price'] = $minPrice['min_price'] ?? null;
+$processedEvents = [];
+foreach ($events as $event) {
+    try {
+        $ticket = $db->fetchOne("SELECT SUM(quantity - sold) AS available FROM tickets WHERE event_id = ?", [$event['id']]);
+        $event['sold_out'] = ($ticket['available'] ?? 0) <= 0;
+        
+        // Get minimum ticket price for this event
+        $minPrice = $db->fetchOne("SELECT MIN(price) AS min_price FROM tickets WHERE event_id = ?", [$event['id']]);
+        $event['price'] = $minPrice['min_price'] ?? null;
+    } catch (Exception $e) {
+        // If error getting tickets, set defaults
+        $event['sold_out'] = false;
+        $event['price'] = null;
+    }
+    $processedEvents[] = $event;
 }
+$events = $processedEvents;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -140,6 +152,13 @@ foreach ($events as &$event) {
 
     <!-- Events Grid -->
     <div class="row">
+      <?php if (empty($events)): ?>
+        <div class="col-12">
+          <div class="alert alert-info text-center">
+            <p>No events found. <a href="create_event.php">Create your first event!</a></p>
+          </div>
+        </div>
+      <?php else: ?>
       <?php foreach($events as $event): ?>
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="event-card">
@@ -160,9 +179,14 @@ foreach ($events as &$event) {
               <i class="fas fa-calendar me-1"></i><?php echo date('F d, Y', strtotime($event['start_datetime'])); ?>
             </small>
             <small class="text-muted">
-              <i class="fas fa-map-marker-alt me-1"></i><?php echo htmlspecialchars($event['venue'] ?? ''); ?>
+              <i class="fas fa-map-marker-alt me-1"></i><?php echo htmlspecialchars($event['venue'] ?? 'TBA'); ?>
             </small>
           </div>
+          <?php if ($event['status'] === 'draft'): ?>
+            <div class="mb-2">
+              <span class="badge bg-secondary">Draft</span>
+            </div>
+          <?php endif; ?>
           <div class="d-flex justify-content-between align-items-center">
             <span class="h4 text-danger mb-0"><?php echo $event['price'] ? 'Ksh ' . number_format($event['price'], 2) : 'Free'; ?></span>
             <?php if ($event['sold_out']): ?>
@@ -173,6 +197,7 @@ foreach ($events as &$event) {
         </div>
       </div>
       <?php endforeach; ?>
+      <?php endif; ?>
     </div>
 
     <!-- Load More Button -->

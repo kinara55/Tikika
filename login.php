@@ -59,7 +59,6 @@ if ($password === '') {
         <?php else: ?>
             <h2 class="success">Login validation passed</h2>
             <p>Username: <?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?></p>
-            <!-- In a real app, verify password hash from DB. -->
         <?php endif; ?>
         <a class="button" href="forms.html">Back to forms</a>
     </div>
