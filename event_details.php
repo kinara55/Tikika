@@ -1,47 +1,25 @@
 <?php
-// Start session and check login status
 require_once 'conf.php';
+require_once 'DB/database.php';
 require_once 'session/session_manager.php';
 
 $sessionManager = new SessionManager($conf);
 $isLoggedIn = $sessionManager->isLoggedIn();
 $userName = $isLoggedIn ? $sessionManager->getUsername() : '';
 $userRole = $isLoggedIn ? $sessionManager->getRoleId() : 0;
-$currentPage = 'events'; // Set current page for active nav highlighting
+$currentPage = 'events';
 
-// event_details.php
-
-// Fake events data (later you can fetch this from database)
-$events = [
-  1 => [
-    "title" => "AfroBeats Night",
-    "date" => "October 15, 2025",
-    "location" => "Nairobi Concert Hall",
-    "price" => "Ksh 1500",
-    "image" => "images/image1.jpg",
-    "description" => "Get ready for a night of amazing AfroBeats music with top artists from across Africa. Dance, connect, and create memories that last forever!"
-  ],
-  2 => [
-    "title" => "Jazz Festival",
-    "date" => "November 2, 2025",
-    "location" => "Uhuru Gardens",
-    "price" => "Ksh 2000",
-    "image" => "images/image2.jpg",
-    "description" => "Experience smooth jazz under the stars with renowned performers from around the world. A night to relax, vibe, and enjoy pure music."
-  ],
-  3 => [
-    "title" => "Bambika na 3 men Army",
-    "date" => "December 10, 2025",
-    "location" => "Beer District",
-    "price" => "Ksh 2500",
-    "image" => "images/image3.jpg",
-    "description" => "Ready to crack your ribssssssss!"
-  ]
-];
-
-// Get the event ID from URL (default to 1 if not provided or invalid)
-$id = isset($_GET['id']) && isset($events[$_GET['id']]) ? (int)$_GET['id'] : 1;
-$event = $events[$id];
+$db = new Database($conf);
+$event = null;
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id > 0) {
+    $event = $db->fetchOne("SELECT * FROM events WHERE id = ?", [$id]);
+}
+if (!$event) {
+    // Show error or redirect if event not found
+    echo '<div class="container mt-5"><div class="alert alert-danger">Event not found.</div></div>';
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -153,9 +131,22 @@ $event = $events[$id];
       </div>
       <div class="col-md-6 d-flex flex-column justify-content-center">
         <h1><?php echo $event['title']; ?></h1>
-        <p><strong>Date:</strong> <?php echo $event['date']; ?></p>
-        <p><strong>Location:</strong> <?php echo $event['location']; ?></p>
-        <p><strong>Price:</strong> <?php echo $event['price']; ?></p>
+    <p><strong>Date:</strong> <?php echo date('F j, Y, g:i a', strtotime($event['start_datetime'])); ?>
+    <?php if (!empty($event['end_datetime'])): ?> - <?php echo date('F j, Y, g:i a', strtotime($event['end_datetime'])); ?><?php endif; ?></p>
+  <p><strong>Location:</strong> <?php echo htmlspecialchars($event['venue'] ?? ''); ?></p>
+    <?php
+    // Fetch ticket types and prices
+    $tickets = $db->fetchAll("SELECT type, price, quantity FROM tickets WHERE event_id = ?", [$event['id']]);
+    if ($tickets && count($tickets) > 0): ?>
+    <p><strong>Ticket Types & Prices:</strong></p>
+    <ul>
+    <?php foreach ($tickets as $ticket): ?>
+      <li><?php echo htmlspecialchars($ticket['type']); ?>: Ksh <?php echo number_format($ticket['price'], 2); ?> (<?php echo $ticket['quantity']; ?> available)</li>
+    <?php endforeach; ?>
+    </ul>
+    <?php else: ?>
+    <p><strong>Tickets:</strong> Not available</p>
+    <?php endif; ?>
         <p><?php echo $event['description']; ?></p>
         <div class="d-flex gap-3 mt-3">
           <a href="buy_ticket.php?id=<?php echo $id; ?>" class="btn btn-buy btn-lg shadow">Buy Ticket</a>

@@ -9,11 +9,6 @@ INSERT IGNORE INTO `users` (`id`, `role_id`, `full_name`, `email`, `password_has
 VALUES (1, 2, 'Sample Organizer', 'organizer@example.com', 'hashed_password_here', '0712345678');
 
 
-#Sample category
-INSERT IGNORE INTO `categories` (`id`, `name`, `description`)
-VALUES (1, 'Music', 'Concerts and music shows');
-
-
 #Sample events (matching buy_ticket.php hardcoded data)
 INSERT IGNORE INTO `events` (`id`, `organizer_id`, `title`, `description`, `venue`, `start_datetime`, `end_datetime`, `status`, `capacity`, `category_id`)
 VALUES 
@@ -34,6 +29,17 @@ VALUES
 (3, 'Regular', 1000.00, 300, 0),
 (3, 'VIP', 2000.00, 100, 0),
 (3, 'VVIP', 3000.00, 50, 0);
-```
+
+
+-- Insert default categories to match create_event.php form
+INSERT INTO categories (id, name, description) VALUES
+  (1, 'Music', 'Music events and concerts'),
+  (2, 'Conference', 'Business and professional conferences'),
+  (3, 'Meetup', 'Social and networking meetups'),
+  (4, 'Sports', 'Sports events and competitions'),
+  (5, 'Workshop', 'Educational and training workshops'),
+  (6, 'Exhibition', 'Exhibitions and expos'),
+  (7, 'Festival', 'Festivals and celebrations'),
+  (8, 'Other', 'Other event types');
 
 

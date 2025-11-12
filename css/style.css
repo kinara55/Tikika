@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 
+>>>>>>> bf0e944a981fc238d8e6e158721f87fbffb75eea
 /* ========== Base Styles ========== */
 * {
     margin: 0;
@@ -7,25 +10,30 @@
 }
 
 body {
-    background-color: #f5f7fa;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(180deg, #fff, #fdf1ff, #ffe8f3);
+    color: #333;
     min-height: 100vh;
 }
 
 /* ========== General Form Styles ========== */
 .form-title {
-    color: #222;
+    font-weight: 700;
+    color: #ee0979;
     text-align: center;
     margin-bottom: 20px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
 }
 
 .form-container {
-    background: #fff;
-    border-radius: 15px;
-    padding: 30px 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 20px 40px;
     max-width: 400px;
     text-align: center;
     margin: 40px auto;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 15px 35px rgba(238, 9, 121, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 form {
@@ -33,44 +41,88 @@ form {
 }
 
 .signup-btn, .login-btn {
-    background: #3723bb;
+    background: linear-gradient(90deg, #ff6a00, #ee0979);
     color: #fff;
     border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
     cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(238, 9, 121, 0.3);
+}
+
+.signup-btn:hover, .login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(238, 9, 121, 0.4);
 }
 
 /* ========== Event Form Styles ========== */
 .event-body {
-    background: #f5f7fa;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(180deg, #fff, #fdf1ff, #ffe8f3);
     min-height: 100vh;
     padding: 40px 0;
 }
 
 .event-container {
-    background-color: bisque;
-    max-width: 500px;
-    margin: 40px auto;
-    border-radius: 15px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    padding: 32px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    max-width: 700px;
+    margin: 5px auto;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(238, 9, 121, 0.1);
+    padding: 80;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .eventform-header {
-    color: #222;
+    background: linear-gradient(135deg, #ff6a00, #ee0979);
+    color: white;
     text-align: center;
-    margin-bottom: 24px;
+    padding: 40px 30px;
+    margin: 0;
+}
+
+.eventform-header h1 {
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.eventform-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
 }
 
 .eventform-container {
-    background: #fff;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    background: transparent;
+    border-radius: 0;
+    padding: 40px;
+    box-shadow: none;
     text-align: left;
-    max-width: 480px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
+}
+
+/* ========== Form Steps ========== */
+.form-step {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.form-step h2 {
+    color: #ee0979;
+    font-weight: 700;
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
 }
 
 .form-row {
@@ -82,75 +134,204 @@ form {
 
 .form-group {
     flex: 1 1 220px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
-    font-weight: 500;
-    margin-bottom: 6px;
+    font-weight: 600;
+    margin-bottom: 8px;
     display: block;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.required {
+    color: #ee0979;
 }
 
 input, select, textarea {
     width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 12px 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
     margin-top: 4px;
     font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
 }
 
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #ff6a00;
+    box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.1);
+    background: #fff;
+}
+
+input:hover, select:hover, textarea:hover {
+    border-color: #ee0979;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ========== Checkbox Styling ========== */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.checkbox-item:hover {
+    background: rgba(255, 106, 0, 0.05);
+    border-color: #ff6a00;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    margin-top: 0;
+}
+
+/* ========== Buttons ========== */
 button.btn-primary {
-    background: #3723bb;
+    background: linear-gradient(90deg, #ff6a00, #ee0979);
     color: #fff;
     border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
+    padding: 14px 28px;
+    border-radius: 25px;
     font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 16px;
+    margin: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(238, 9, 121, 0.3);
 }
 
+button.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(238, 9, 121, 0.4);
+}
+
+button.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* ========== Messages ========== */
 .success-message, .error-message {
-    display: none;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 16px;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
     font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .success-message {
-    background: #e6ffed;
+    background: linear-gradient(135deg, #e8f5e8, #d4edda);
     color: #0a7f2e;
     border: 1px solid #b7e4c7;
 }
 
 .error-message {
-    background: #ffe6e6;
+    background: linear-gradient(135deg, #ffe6e6, #f8d7da);
     color: #b00020;
     border: 1px solid #f5c2c7;
 }
 
+/* ========== Navbar (if using) ========== */
+.navbar {
+    background: linear-gradient(90deg, #ff6a00, #ee0979) !important;
+}
+.navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+.nav-link {
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+.nav-link:hover {
+    color: #ffeb3b !important;
+}
+
 /* ========== Responsive Styles ========== */
+@media (max-width: 768px) {
+    .event-container {
+        max-width: 95%;
+        margin: 20px auto;
+        border-radius: 15px;
+    }
+    
+    .eventform-header {
+        padding: 30px 20px;
+    }
+    
+    .eventform-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .eventform-container {
+        padding: 25px 20px;
+    }
+    
+    .form-step {
+        padding: 20px;
+    }
+}
+
 @media (max-width: 600px) {
     .event-container, .eventform-container {
         max-width: 100%;
-        padding: 12px;
-        box-shadow: none;
+        margin: 10px;
+        padding: 15px;
+        border-radius: 10px;
     }
+    
     .form-row {
         flex-direction: column;
         gap: 0;
     }
+    
+    .form-group {
+        flex: 1 1 100%;
+    }
+    
     button.btn-primary {
         width: 100%;
+        margin: 8px 0;
     }
+    
     input, select, textarea {
         font-size: 0.95rem;
-        padding: 7px 8px;
+        padding: 10px 12px;
     }
+    
     .eventform-header {
         font-size: 1.2rem;
         margin-bottom: 16px;
+        padding: 25px 15px;
+    }
+    
+    .eventform-header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: 1fr;
     }
 }

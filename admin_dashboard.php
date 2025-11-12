@@ -159,6 +159,11 @@ $sessions = $db->fetchAll("SELECT * FROM sessions");
         <tbody>
         <?php foreach ($events as $event): ?>
           <tr>
+            <td><?= htmlspecialchars($event['id']) ?></td>
+            <td><?= htmlspecialchars($event['title']) ?></td>
+            <td><?= htmlspecialchars($event['description']) ?></td>
+            
+            <td><?= htmlspecialchars($event['date'] ?? 'N/A') ?></td>
             <td><?= $event['id'] ?></td>
             <td><?= $event['organizer_id'] ?></td>
             <td><?= htmlspecialchars($event['title']) ?></td>
@@ -174,6 +179,160 @@ $sessions = $db->fetchAll("SELECT * FROM sessions");
               <?php endif; ?>
             </td>
             <td><?= htmlspecialchars($event['created_at']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div id="categoriesSection" class="d-none">
+    <h2>Categories</h2>
+    <div class="table-responsive">
+      <table id="categoriesTable" class="table table-striped table-bordered">
+        <thead class="table-success">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($categories as $cat): ?>
+          <tr>
+            <td><?= $cat['id'] ?></td>
+            <td><?= htmlspecialchars($cat['name']) ?></td>
+            <td><?= htmlspecialchars($cat['description']) ?></td>
+            <td><?= $cat['created_at'] ?></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TICKETS -->
+  <div id="ticketsSection" class="d-none">
+    <h2>Tickets</h2>
+    <div class="table-responsive">
+      <table id="ticketsTable" class="table table-striped table-bordered">
+        <thead class="table-info">
+          <tr>
+            <th>ID</th>
+            <th>Event ID</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Sold</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($tickets as $t): ?>
+          <tr>
+            <td><?= $t['id'] ?></td>
+            <td><?= $t['event_id'] ?></td>
+            <td><?= htmlspecialchars($t['type']) ?></td>
+            <td><?= $t['price'] ?></td>
+            <td><?= $t['quantity'] ?></td>
+            <td><?= $t['sold'] ?></td>
+            <td><?= $t['created_at'] ?></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div id="ordersSection" class="d-none">
+    <h2>Orders</h2>
+    <div class="table-responsive">
+      <table id="ordersTable" class="table table-striped table-bordered">
+        <thead class="table-primary">
+          <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Total</th>
+            <th>Provider</th>
+            <th>Reference</th>
+            <th>Status</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($orders as $o): ?>
+          <tr>
+              <td><?= htmlspecialchars($o['id'] ?? '') ?></td>
+    <td><?= htmlspecialchars($o['user_id'] ?? '') ?></td>
+    <td><?= htmlspecialchars($o['total_amount'] ?? '') ?></td>
+    <td><?= htmlspecialchars($o['payment_provider'] ?? '') ?></td>
+    <td><?= htmlspecialchars($o['provider_reference'] ?? '') ?></td>
+    <td><?= htmlspecialchars($o['status'] ?? '') ?></td>
+    <td><?= htmlspecialchars($o['created_at'] ?? '') ?></td>
+
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ORDER ITEMS -->
+  <div id="orderItemsSection" class="d-none">
+    <h2>Order Items</h2>
+    <div class="table-responsive">
+      <table id="orderItemsTable" class="table table-striped table-bordered">
+        <thead class="table-dark text-white">
+          <tr>
+            <th>ID</th>
+            <th>Order ID</th>
+            <th>Event ID</th>
+            <th>Ticket Type</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($order_items as $oi): ?>
+          <tr>
+            <td><?= $oi['id'] ?></td>
+            <td><?= $oi['order_id'] ?></td>
+            <td><?= $oi['event_id'] ?></td>
+            <td><?= htmlspecialchars($oi['ticket_type']) ?></td>
+            <td><?= $oi['quantity'] ?></td>
+            <td><?= $oi['unit_price'] ?></td>
+            <td><?= $oi['created_at'] ?></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SESSIONS -->
+  <div id="sessionsSection" class="d-none">
+    <h2>Sessions</h2>
+    <div class="table-responsive">
+      <table id="sessionsTable" class="table table-striped table-bordered">
+        <thead class="table-secondary">
+          <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Data</th>
+            <th>Last Activity</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($sessions as $s): ?>
+          <tr>
+            <td><?= htmlspecialchars($s['id']) ?></td>
+            <td><?= htmlspecialchars($s['user_id']) ?></td>
+            <td><?= htmlspecialchars(substr($s['data'], 0, 100)) ?>...</td>
+            <td><?= $s['last_activity'] ?></td>
           </tr>
         <?php endforeach; ?>
         </tbody>

@@ -9,12 +9,31 @@ $userName = $isLoggedIn ? $sessionManager->getUsername() : '';
 $userRole = $isLoggedIn ? $sessionManager->getRoleId() : 0;
 $currentPage = 'home'; // Set current page for active nav highlighting
 
-// Define events (replace later with DB fetch)
-$events = [
-    1 => ["title" => "AfroBeats Night", "date" => "Oct 15, 2025", "price" => "Ksh 1500", "image" => "images/image1.jpg"],
-    2 => ["title" => "Jazz Festival", "date" => "Nov 2, 2025", "price" => "Ksh 2000", "image" => "images/image2.jpg"],
-    3 => ["title" => "Bambika na 3 men Army", "date" => "Dec 10, 2025", "price" => "Ksh 2500", "image" => "images/image3.jpg"]
-];
+// TODO: Replace the hardcoded $events array below with a database fetch (e.g., from MySQL) for production use.
+
+require_once 'DB/database.php';
+$db = new Database($conf);
+
+// Fetch events from DB
+$events = $db->fetchAll("SELECT id, title, start_datetime, capacity, image_url, price FROM events ORDER BY start_datetime ASC");
+
+// For each event, check if tickets are sold out
+foreach ($events as &$event) {
+    $ticket = $db->fetchOne("SELECT SUM(quantity - sold) AS available FROM tickets WHERE event_id = ?", [$event['id']]);
+    $event['sold_out'] = ($ticket['available'] ?? 0) <= 0;
+}
+
+// Format events for display
+$formattedEvents = [];
+foreach ($events as $event) {
+    $formattedEvents[$event['id']] = [
+        'title' => $event['title'],
+        'date' => date('M d, Y', strtotime($event['start_datetime'])),
+        'price' => isset($event['price']) ? 'Ksh ' . number_format($event['price']) : (isset($event['capacity']) ? 'Ksh ' . number_format($event['capacity']) : 'Free'),
+        'image' => $event['image_url'] ?? 'images/default.jpg'
+    ];
+}
+$events = $formattedEvents;
 ?>
 <!DOCTYPE html>
 <html lang="en">

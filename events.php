@@ -8,6 +8,18 @@ $isLoggedIn = $sessionManager->isLoggedIn();
 $userName = $isLoggedIn ? $sessionManager->getUsername() : '';
 $userRole = $isLoggedIn ? $sessionManager->getRoleId() : 0;
 $currentPage = 'events'; // Set current page for active nav highlighting
+
+require_once 'DB/database.php';
+$db = new Database($conf);
+
+// Fetch events from DB
+$events = $db->fetchAll("SELECT id, title, description, venue, start_datetime, end_datetime, status, capacity, category_id, image_url, price FROM events ORDER BY start_datetime ASC");
+
+// For each event, check if tickets are sold out
+foreach ($events as &$event) {
+    $ticket = $db->fetchOne("SELECT SUM(quantity - sold) AS available FROM tickets WHERE event_id = ?", [$event['id']]);
+    $event['sold_out'] = ($ticket['available'] ?? 0) <= 0;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -124,68 +136,30 @@ $currentPage = 'events'; // Set current page for active nav highlighting
 
     <!-- Events Grid -->
     <div class="row">
-      <!-- AfroBeats Night -->
+      <?php foreach($events as $event): ?>
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="event-card">
-          <img src="images/image1.jpg" class="event-image" alt="AfroBeats Night">
-          <h3>AfroBeats Night</h3>
-          <p class="text-muted">Get ready for a night of amazing AfroBeats music with top artists from across Africa. Dance, connect, and create memories that last forever!</p>
+          <img src="<?php echo htmlspecialchars($event['image_url'] ?? 'images/default.jpg'); ?>" class="event-image" alt="<?php echo htmlspecialchars($event['title']); ?>">
+          <h3><?php echo htmlspecialchars($event['title']); ?></h3>
+          <p class="text-muted"><?php echo htmlspecialchars($event['description']); ?></p>
           <div class="d-flex justify-content-between align-items-center mb-3">
             <small class="text-muted">
-              <i class="fas fa-calendar me-1"></i>October 15, 2025
+              <i class="fas fa-calendar me-1"></i><?php echo date('F d, Y', strtotime($event['start_datetime'])); ?>
             </small>
             <small class="text-muted">
-              <i class="fas fa-map-marker-alt me-1"></i>Nairobi Concert Hall
+              <i class="fas fa-map-marker-alt me-1"></i><?php echo htmlspecialchars($event['venue'] ?? ''); ?>
             </small>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="h4 text-danger mb-0">Ksh 1500</span>
-            <a href="event_details.php?id=1" class="btn btn-outline-danger">View Details</a>
+            <span class="h4 text-danger mb-0">Ksh <?php echo number_format($event['price'], 2); ?></span>
+            <?php if ($event['sold_out']): ?>
+              <span class="badge bg-danger">Sold Out</span>
+            <?php endif; ?>
+            <a href="event_details.php?id=<?php echo $event['id']; ?>" class="btn btn-outline-danger">View Details</a>
           </div>
         </div>
       </div>
-
-      <!-- Jazz Festival -->
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="event-card">
-          <img src="images/image2.jpg" class="event-image" alt="Jazz Festival">
-          <h3>Jazz Festival</h3>
-          <p class="text-muted">Experience smooth jazz under the stars with renowned performers from around the world. A night to relax, vibe, and enjoy pure music.</p>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <small class="text-muted">
-              <i class="fas fa-calendar me-1"></i>November 2, 2025
-            </small>
-            <small class="text-muted">
-              <i class="fas fa-map-marker-alt me-1"></i>Uhuru Gardens
-            </small>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="h4 text-danger mb-0">Ksh 2000</span>
-            <a href="event_details.php?id=2" class="btn btn-outline-danger">View Details</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bambika na 3 men Army -->
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="event-card">
-          <img src="images/image3.jpg" class="event-image" alt="Bambika na 3 men Army">
-          <h3>Bambika na 3 men Army</h3>
-          <p class="text-muted">Ready to crack your ribssssssss!</p>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <small class="text-muted">
-              <i class="fas fa-calendar me-1"></i>December 10, 2025
-            </small>
-            <small class="text-muted">
-              <i class="fas fa-map-marker-alt me-1"></i>Beer District
-            </small>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="h4 text-danger mb-0">Ksh 2500</span>
-            <a href="event_details.php?id=3" class="btn btn-outline-danger">View Details</a>
-          </div>
-        </div>
-      </div>
+      <?php endforeach; ?>
     </div>
 
     <!-- Load More Button -->

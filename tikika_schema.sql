@@ -272,240 +272,42 @@ INSERT INTO `tickets` (`id`, `event_id`, `type`, `price`, `quantity`, `sold`, `c
 (17, 3, 'VIP', 2000.00, 100, 0, '2025-10-12 19:11:12'),
 (18, 3, 'VVIP', 3000.00, 50, 0, '2025-10-12 19:11:12');
 
--- --------------------------------------------------------
+-- Orders
+CREATE TABLE orders (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  total_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  payment_provider VARCHAR(100),
+  provider_reference VARCHAR(255),
+  status ENUM('pending','paid','cancelled','refunded') NOT NULL DEFAULT 'pending',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT
+);
 
---
--- Table structure for table `users`
---
+-- Order items (tickets inside an order)
+CREATE TABLE order_items (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id BIGINT UNSIGNED NOT NULL,
+  event_id INT UNSIGNED NOT NULL,
+  ticket_type VARCHAR(50) NOT NULL,
+  quantity INT UNSIGNED NOT NULL DEFAULT 1,
+  unit_price DECIMAL(10,2) NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE RESTRICT
+);
 
-CREATE TABLE `users` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `role_id` int(10) UNSIGNED NOT NULL DEFAULT 3,
-  `full_name` varchar(150) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password_hash` varchar(255) NOT NULL,
-  `phone` varchar(30) DEFAULT NULL,
-  `is_verified` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `is_banned` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Sessions (if you want DB-based sessions instead of PHP default files)
+CREATE TABLE sessions (
+  id VARCHAR(128) PRIMARY KEY,
+  user_id INT UNSIGNED,
+  data TEXT,
+  last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
 
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `role_id`, `full_name`, `email`, `password_hash`, `phone`, `is_verified`, `created_at`, `updated_at`, `is_banned`) VALUES
-(1, 3, 'Zakariya Mohamed', 'Boochimio8@gmail.com', '$2y$10$9/DXGgkBd7KSGtoL3YxQL.FaMS6s2Q/AWGTvnefqioASB3VE38TCK', '0783281584', 1, '2025-10-12 19:06:06', '2025-10-12 19:07:02', 0),
-(2, 3, 'Zakariya Mohamed Mohamed', 'Boochimo9@gmail.com', '$2y$10$IyjknEcQCpW1Zw8q.d4hWubEpD8e11FE3iAnqazbGoUyNcdDFlzB6', '0783281584', 1, '2025-10-14 08:14:40', '2025-10-14 08:14:56', 0),
-(3, 3, 'Abel', 'bridgetwanyama0@gmail.com', '$2y$10$wVgcX46t7/euKtIA5wusFO3QQZk7IL31vZUTvgcQ87wvUO6ZadfaW', '0743694406', 1, '2025-10-22 11:51:20', '2025-10-22 11:51:55', 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `verification_codes`
---
-
-CREATE TABLE `verification_codes` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` int(10) UNSIGNED NOT NULL,
-  `code` varchar(10) NOT NULL,
-  `expires_at` datetime NOT NULL,
-  `used_at` datetime DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `verification_codes`
---
-
-INSERT INTO `verification_codes` (`id`, `user_id`, `code`, `expires_at`, `used_at`, `created_at`) VALUES
-(1, 1, '966296', '2025-10-12 16:21:06', '2025-10-12 16:07:02', '2025-10-12 19:06:06'),
-(2, 2, '906210', '2025-10-14 05:29:40', '2025-10-14 05:14:56', '2025-10-14 08:14:40'),
-(3, 3, '950566', '2025-10-22 09:06:20', '2025-10-22 08:51:55', '2025-10-22 11:51:20');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
-
---
--- Indexes for table `events`
---
-ALTER TABLE `events`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `organizer_id` (`organizer_id`),
-  ADD KEY `category_id` (`category_id`),
-  ADD KEY `idx_events_start` (`start_datetime`);
-
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_orders_user` (`user_id`);
-
---
--- Indexes for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `event_id` (`event_id`);
-
---
--- Indexes for table `password_resets`
---
-ALTER TABLE `password_resets`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `code` (`code`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
-
---
--- Indexes for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `tickets`
---
-ALTER TABLE `tickets`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_tickets_event` (`event_id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `role_id` (`role_id`),
-  ADD KEY `idx_users_email` (`email`);
-
---
--- Indexes for table `verification_codes`
---
-ALTER TABLE `verification_codes`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `code` (`code`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `categories`
---
-ALTER TABLE `categories`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `events`
---
-ALTER TABLE `events`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `orders`
---
-ALTER TABLE `orders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
-
---
--- AUTO_INCREMENT for table `order_items`
---
-ALTER TABLE `order_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
-
---
--- AUTO_INCREMENT for table `password_resets`
---
-ALTER TABLE `password_resets`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `roles`
---
-ALTER TABLE `roles`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT for table `tickets`
---
-ALTER TABLE `tickets`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `verification_codes`
---
-ALTER TABLE `verification_codes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `events`
---
-ALTER TABLE `events`
-  ADD CONSTRAINT `events_ibfk_1` FOREIGN KEY (`organizer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `events_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Constraints for table `orders`
---
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
-
---
--- Constraints for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `tickets`
---
-ALTER TABLE `tickets`
-  ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `users`
---
-ALTER TABLE `users`
-  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON UPDATE CASCADE;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+-- Indexes
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_events_start ON events(start_datetime);
+CREATE INDEX idx_tickets_event ON tickets(event_id);
+CREATE INDEX idx_orders_user ON orders(user_id);
