@@ -155,10 +155,20 @@ foreach ($cartItems as $item) {
             <?php else: ?>
                 <div id="cart-items">
                     <?php foreach ($cartItems as $index => $item): ?>
-                        <div class="cart-item" data-index="<?php echo $index; ?>">
+<div class="cart-item" data-index="<?php echo $index; ?>">
                             <div class="row align-items-center">
                                 <div class="col-md-2">
-                                    <img src="<?php echo htmlspecialchars($item['event_image']); ?>"
+                                    <?php
+                                    // Handle image URL - use event image if available, otherwise use a default
+                                    $imageUrl = $item['event_image'] ?? '';
+                                    if (empty($imageUrl) || !file_exists($imageUrl)) {
+                                        // Use a default image based on event ID
+                                        $defaultImages = ['images/image1.jpg', 'images/image2.jpg', 'images/image3.jpg'];
+                                        $eventId = $item['event_id'] ?? 1;
+                                        $imageUrl = $defaultImages[($eventId - 1) % count($defaultImages)];
+                                    }
+                                    ?>
+                                    <img src="<?php echo htmlspecialchars($imageUrl); ?>"
                                         alt="<?php echo htmlspecialchars($item['event_title']); ?>"
                                         class="event-image">
                                 </div>

@@ -20,6 +20,15 @@ if (!$event) {
     echo '<div class="container mt-5"><div class="alert alert-danger">Event not found.</div></div>';
     exit;
 }
+
+// Handle image URL - use event image if available, otherwise use a default
+$imageUrl = $event['image_url'];
+if (empty($imageUrl) || !file_exists($imageUrl)) {
+    // Use a default image based on event ID
+    $defaultImages = ['images/image1.jpg', 'images/image2.jpg', 'images/image3.jpg'];
+    $imageUrl = $defaultImages[($event['id'] - 1) % count($defaultImages)];
+}
+$event['image'] = $imageUrl;
 ?>
 <!DOCTYPE html>
 <html lang="en">
